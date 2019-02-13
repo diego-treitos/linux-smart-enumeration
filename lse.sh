@@ -84,10 +84,10 @@ lse_level=0 #Valid levels 0:default, 1:interesting, 2:all
 #( Lib
 cecho() {
   if $lse_color; then
-    echo -e $*
+    echo -e "$@"
   else
     # If color is disabled we remove it
-    echo -e $* | sed 's/\x1B\[[0-9;]\+[A-Za-z]//g'
+    echo -e "$@" | sed 's/\x1B\[[0-9;]\+[A-Za-z]//g'
   fi
 }
 lse_error() {
@@ -129,10 +129,12 @@ lse_ask() {
   esac
 }
 lse_request_information() {
+  cecho "${grey}---"
   if $lse_interactive; then
     [ -z "$lse_user" ] && lse_user=`lse_ask "Could not find current user name. Current user?"`
     lse_pass=`lse_ask "If you know the current user password, write it here for better results"`
   fi
+  cecho "${grey}---"
 }
 lse_test() {
   # Test id
@@ -173,6 +175,22 @@ lse_test_passed() {
   done
   return 1
 }
+lse_show_info() {
+  echo
+  cecho    "${lblue}        User:${reset} $lse_user"
+  cecho -n "${lblue}    Password:${reset} "
+  if [ -z "$lse_pass" ]; then
+    cecho "${grey}none${reset}"
+  else
+    cecho "******"
+  fi
+  cecho    "${lblue}        Home:${reset} $lse_home"
+  echo
+  cecho    "${lblue}    Hostname:${reset} $lse_hostname"
+  cecho    "${lblue}       Linux:${reset} $lse_linux"
+  cecho    "${lblue}Architecture:${reset} $lse_arch"
+  echo
+}
 #)
 
 #( Main
@@ -187,14 +205,17 @@ while getopts "hcil:" option; do
 done
 
 lse_request_information
+lse_show_info
 #)
 
 ########################################################################( tests
 #
+#  A successful test will receive some output while a failed tests will receive
+# an empty string.
+#
 # Example of a test
-lse_test "000" "1" "Writable files outside users home" "$( (
-find / -writable -not -path "$HOME/*"
-)2>/dev/null)"
+lse_user_writable="$( find / -writable -not -path "$HOME/*" 2>/dev/null )"
+lse_test "000" "1" "Writable files outside users home" "$lse_user_writable"
 
 #
 ##)
