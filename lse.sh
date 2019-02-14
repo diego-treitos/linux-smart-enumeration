@@ -339,12 +339,36 @@ lse_test "fs080" "1" "Can we read subdirectories under /home?" "`for h in /home/
 #check for SSH files in home directories
 lse_test "fs090" "1" "SSH files in home directories" "`for h in $(cut -d: -f6 /etc/passwd); do find "$h" \( -name "*id_dsa*" -o -name "*id_rsa*" -o -name "known_hosts" -o -name "authorized_hosts" -o -name "authorized_keys" \) -exec ls -la {} 2>/dev/null \; ; done 2>/dev/null`"
 
+#check useful binaries
+lse_test "fs100" "1" "Useful binaries" "`(which curl; which dig; which gcc; which nc.openbsd; which nc; which netcat; which nmap; which socat; which wget;)2>/dev/null`"
+
+#check for interesting files in home directories
+lse_test "fs110" "1" "Other interesting files in home directories" "`for h in $(cut -d: -f6 /etc/passwd); do find "$h" \( -name "*.rhosts" -o -name ".git-credentials" -o -name ".*history" \) -exec ls -la {} 2>/dev/null \; ; done 2>/dev/null`"
+
+#looking for credentials in /etc/fstab and /etc/mtab
+lse_test "fs120" "0" "Are there any credentials in fstab/mtab?" "`grep -E '(user|username|login|pass|password|pw|credentials)[=:]' /etc/fstab /etc/mtab 2>/dev/null`"
+
+#check if current user has mail
+lse_test "fs130" "1" "Does $lse_user have mail?" "`ls -l "/var/mail/$lse_user" 2>/dev/null`"
+
+#check if we can access other users mail mail
+lse_test "fs140" "0" "Can we access other users mail?" "`for f in /var/mail/*; do [ "$f" != "/var/mail/$lse_user" ] && [ -r "$f" ] && echo "$f"; done 2>/dev/null`"
+
 if [ $lse_level -ge 2 ]; then
   #files owned by user
   lse_test "fs500" "2" "Files owned by $lse_user" "`find / -user $lse_user -type f ! -path "/proc/*" ! -path "/sys/*" -exec ls -al {} \; 2>/dev/null`"
 
   #check for SSH files anywhere
   lse_test "fs510" "2" "SSH files anywhere" "`find / \( -name "*id_dsa*" -o -name "*id_rsa*" -o -name "known_hosts" -o -name "authorized_hosts" -o -name "authorized_keys" \) -exec ls -la {} 2>/dev/null \;`"
+
+  #dump hosts.equiv file
+  lse_test "fs520" "2" "Check hosts.equiv file and its contents" "`find /etc -iname hosts.equiv -exec ls -la {} 2>/dev/null \; -exec cat {} 2>/dev/null \;`"
+
+  #list nfs shares
+  lse_test "fs530" "2" "List NFS server shares" "`(ls -la /etc/exports; cat /etc/exports )2>/dev/null`"
+
+  #dump fstab
+  lse_test "fs540" "2" "Dump fstab file" "`cat /etc/fstab 2>/dev/null`"
 fi
 
 
