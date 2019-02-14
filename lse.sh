@@ -384,22 +384,29 @@ if [ $lse_level -ge 2 ]; then
   lse_test "sys080" "2" "System password policies in /etc/login.defs" "`grep "^PASS_MAX_DAYS\|^PASS_MIN_DAYS\|^PASS_WARN_AGE\|^ENCRYPT_METHOD" /etc/login.defs 2>/dev/null`"
 fi
 
-######################################################################( selinux 
-lse_header "selinux"
+#####################################################################( security
+lse_header "security"
 
 #check if selinux is present
 lse_test "sel000" "1" "Is SELinux present?" "`sestatus 2>/dev/null`"
 
-if lse_test_passed "sel000"; then
-  #get all binaries with capabilities
-  lse_cap_bin="`getcap -r / 2> /dev/null`"
-  lse_test "sel010" "1" "List files with capabilities" "$lse_cap_bin"
+#get all binaries with capabilities
+lse_cap_bin="`getcap -r / 2> /dev/null`"
+lse_test "sel010" "1" "List files with capabilities" "$lse_cap_bin"
 
-  #check if we can write an a binary with capabilities
-  lse_test "sel020" "0" "Can we write to a binary with caps?" "`for b in $(echo -e "$lse_cap_bin" | cut -d' ' -f1); do [ -w "$b" ] && echo "$b"; done 2>/dev/null`"
+#check if we can write an a binary with capabilities
+lse_test "sel020" "0" "Can we write to a binary with caps?" "`for b in $(echo -e "$lse_cap_bin" | cut -d' ' -f1); do [ -w "$b" ] && echo "$b"; done 2>/dev/null`"
 
-  #check if we have all capabilities in any binary
-  lse_test "sel030" "0" "Do we have all caps in any binary?" "`(echo -e "$lse_cap_bin" | grep -v 'cap_')2>/dev/null`"
+#check if we have all capabilities in any binary
+lse_test "sel030" "0" "Do we have all caps in any binary?" "`(echo -e "$lse_cap_bin" | grep -v 'cap_')2>/dev/null`"
+
+#search /etc/security/capability.conf for users associated capapilies
+lse_user_caps=`grep -v '^#\|none\|^$' /etc/security/capability.conf 2>/dev/null`
+lse_test "sel040" "1" "Users with associated capabilities" "$lse_user_caps"
+
+if lse_test_passed "sel040"; then
+  #does user have capabilities
+  show_test "Does current user have capabilities?" "`(echo -e "$lse_user_caps" | grep "$lse_user" )2>/dev/null`"
 fi
 
 
