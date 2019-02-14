@@ -375,7 +375,15 @@ lse_header "selinux"
 lse_test "sel000" "1" "Is SELinux present?" "`sestatus 2>/dev/null`"
 
 if lse_test_passed "sel000"; then
-  sleep 0.1
+  #get all binaries with capabilities
+  lse_cap_bin="`getcap -r / 2> /dev/null`"
+  lse_test "sel010" "1" "List files with capabilities" "$lse_cap_bin"
+
+  #check if we can write an a binary with capabilities
+  lse_test "sel020" "0" "Can we write to a binary with caps?" "`for b in $(echo -e "$lse_cap_bin" | cut -d' ' -f1); do [ -w "$b" ] && echo "$b"; done 2>/dev/null`"
+
+  #check if we have all capabilities in any binary
+  lse_test "sel030" "0" "Do we have all caps in any binary?" "`(echo -e "$lse_cap_bin" | grep -v 'cap_')2>/dev/null`"
 fi
 
 
