@@ -1,6 +1,8 @@
 #!/bin/bash
 # vim: set ts=2 sw=2 sts=2 et:
 
+# Author: Diego Blanco <diego.blanco@treitos.com>
+# GitHub: https://github.com/diego-treitos/linux-smart-enumeration
 # 
 lse_version="0.1"
 
@@ -245,6 +247,7 @@ lse_run_tests_users() {
   fi
 }
 
+
 #########################################################################( sudo
 lse_run_tests_sudo() {
   lse_header "sudo"
@@ -281,6 +284,7 @@ lse_run_tests_sudo() {
   #check users that sudoed in the past
   lse_test "sud050" "1" "Do we know if any other users used sudo?" "`for uh in $(cut -d: -f1,6 /etc/passwd); do [ -f "${uh##*:}/.sudo_as_admin_successful" ] && echo "${uh%%:*}"; done  2>/dev/null`"
 }
+
 
 ##################################################################( file system
 lse_run_tests_filesystem() {
@@ -396,6 +400,7 @@ lse_run_tests_system() {
     lse_test "sys080" "2" "System password policies in /etc/login.defs" "`grep "^PASS_MAX_DAYS\|^PASS_MIN_DAYS\|^PASS_WARN_AGE\|^ENCRYPT_METHOD" /etc/login.defs 2>/dev/null`"
   fi
 }
+
 
 #####################################################################( security
 lse_run_tests_security() {
@@ -621,6 +626,7 @@ lse_run_tests_software() {
     lse_test "sw530" "2" "Apache version" "`(apache2 -v; httpd -v )2>/dev/null`"
   fi
 }
+
 
 ###################################################################( containers
 lse_run_tests_containers() {
