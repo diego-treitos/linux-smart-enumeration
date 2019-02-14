@@ -169,7 +169,7 @@ lse_test() {
     if [ $lse_level -ge $level ]; then
       cecho "${grey}---$reset"
       echo "$output"
-      cecho "${grey}---$reset\n"
+      cecho "${grey}---$reset"
     fi
     return 0
   fi
