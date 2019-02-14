@@ -61,6 +61,8 @@ crossedout_off='\e[29m'
 #( Globals
 #
 # user
+lse_user_id="$UID"
+[ -z "$lse_user_id" ] && lse_user_id="`id -u`"
 lse_user="$USER"
 [ -z "$lse_user" ] && lse_user="`id -nu`"
 lse_pass=""
@@ -129,12 +131,12 @@ lse_ask() {
   esac
 }
 lse_request_information() {
-  cecho "${grey}---"
   if $lse_interactive; then
+  cecho "${grey}---"
     [ -z "$lse_user" ] && lse_user=`lse_ask "Could not find current user name. Current user?"`
     lse_pass=`lse_ask "If you know the current user password, write it here for better results"`
-  fi
   cecho "${grey}---"
+  fi
 }
 lse_test() {
   # Test id
@@ -147,8 +149,9 @@ lse_test() {
   local output="$4"
 
   local l="${lred}!"
-  [ $level -eq 1 ] && l="${lyellow}*"
-  [ $level -eq 2 ] && l="${lblue}i"
+  local r="${lgreen}"
+  [ $level -eq 1 ] && l="${lyellow}*" && r="${cyan}"
+  [ $level -eq 2 ] && l="${lblue}i" && r="${blue}"
 
   cecho -n "${white}[${l}${white}] $name${grey}"
   for i in $(seq $((${#name}+4)) 74); do
@@ -156,15 +159,17 @@ lse_test() {
   done
 
   if [ -z "$output" ]; then
-    cecho "${red} nope${reset}"
+    cecho "${grey} nope${reset}"
+    return 1
   else
     lse_passed_tests+=" $id"
-    cecho "${lgreen} yes!${reset}"
+    cecho "${r} yes!${reset}"
     if [ $lse_level -ge $level ]; then
       cecho "${grey}---$reset"
       echo "$output"
       cecho "${grey}---$reset\n"
     fi
+    return 0
   fi
 }
 lse_test_passed() {
@@ -178,6 +183,7 @@ lse_test_passed() {
 lse_show_info() {
   echo
   cecho    "${lblue}        User:${reset} $lse_user"
+  cecho    "${lblue}     User ID:${reset} $lse_user_id"
   cecho -n "${lblue}    Password:${reset} "
   if [ -z "$lse_pass" ]; then
     cecho "${grey}none${reset}"
@@ -190,6 +196,15 @@ lse_show_info() {
   cecho    "${lblue}       Linux:${reset} $lse_linux"
   cecho    "${lblue}Architecture:${reset} $lse_arch"
   echo
+}
+lse_header() {
+  local title="$*"
+  local text="${magenta}"
+  for i in $(seq ${#title} 70); do
+    text+="="
+  done
+  text+="(${green} $title ${magenta})====="
+  cecho "$text${reset}"
 }
 #)
 
@@ -208,14 +223,121 @@ lse_request_information
 lse_show_info
 #)
 
-########################################################################( tests
+########################################################################( TESTS
 #
 #  A successful test will receive some output while a failed tests will receive
 # an empty string.
 #
-# Example of a test
-lse_user_writable="$( find / -writable -not -path "$HOME/*" 2>/dev/null )"
-lse_test "000" "1" "Writable files outside users home" "$lse_user_writable"
+
+########################################################################( users 
+lse_header "users"
+
+#user groups
+lse_user_groups="`groups 2>/dev/null`"
+lse_test "usr000" "2" "Current user groups" "$lse_user_groups"
+
+#user in an administrative group
+lse_test "usr010" "1" "Is current user in an administrative group?" "`(grep -E '^(adm|admin|root|sudo|wheel)' /etc/group | grep -E \"(:|,)$lse_user\")2>/dev/null`"
+
+#other users in an administrative group
+lse_test "usr020" "1" "Are there other users in an administrative groups?" "`(grep -E '^(adm|admin|root|sudo|wheel)' /etc/group | grep -Ev ':$')2>/dev/null`"
+
+#other users with shell
+lse_test "usr030" "1" "Other users with shell" "` grep -E 'sh$' /etc/passwd 2>/dev/null`"
+
+#dump user groups
+[ $lse_level -ge 2 ] && lse_test "usr040" "2" "Groups for other users" "`cat /etc/group 2>/dev/null`"
+
+#dump users
+[ $lse_level -ge 2 ] && lse_test "usr050" "2" "Other users" "`cat /etc/passwd 2>/dev/null`"
+
+
+#########################################################################( sudo
+lse_header "sudo"
+
+#variables for sudo checks
+lse_sudo=false
+lse_sudo_commands=""
+
+#can we sudo without supplying a password
+lse_test "sud000" "0" "Can we sudo without a password?" "`echo '' | sudo -S id 2>/dev/null`" && lse_sudo=true
+
+#can we list sudo commands without supplying a password
+if ! $lse_sudo; then
+  lse_sudo_commands=`echo '' | sudo -S -l 2>/dev/null`
+  lse_test "sud010" "0" "Can we list sudo commands without a password?" "$lse_sudo_commands"
+fi
+
+if [ "$lse_pass" ]; then
+  #can we sudo supplying a password
+  if ! $lse_sudo; then
+    lse_test "sud020" "0" "Can we sudo with a password?" "$(echo "$lse_pass" | sudo -S id 2>/dev/null)" && lse_sudo=true
+  fi
+
+  #can we list sudo commands without supplying a password
+  if ! $lse_sudo && [ -z "$lse_sudo_commands" ]; then
+    lse_sudo_commands=$(echo "$lse_pass" | sudo -S -l 2>/dev/null)
+    lse_test "sud030" "0" "Can we list sudo commands with a password?" "$lse_sudo_commands"
+  fi
+fi
+
+#check if we can read the sudoers file
+lse_test "sud040" "1" "Can we read /etc/sudoers?" "`cat /etc/sudoers 2>/dev/null`"
+
+#check users that sudoed in the past
+lse_test "sud050" "1" "Do we know if any other users used sudo?" "`for uh in $(cut -d: -f1,6 /etc/passwd); do [ -f "${uh##*:}/.sudo_as_admin_successful" ] && echo "${uh%%:*}"; done  2>/dev/null`"
+
+
+##################################################################( file system
+lse_header "file system"
+
+#writable files outside user's home
+lse_user_writable="`find / -writable -not -path "$HOME/*" 2>/dev/null`"
+lse_test "fs000" "1" "Writable files outside users home" "$lse_user_writable"
+
+#get setuid binaries
+lse_setuid_binaries="`find / -perm -4000 2> /dev/null`"
+lse_test "fs010" "1" "Binaries with setuid bit" "$lse_setuid_binaries"
+
+#uncommon setuid binaries
+lse_test_passed "fs010" && \
+  lse_test "fs020" "0" "Uncommon setuid binaries" "`echo -e "$lse_setuid_binaries" | grep -Ev '^/(bin|sbin|usr/bin|usr/lib|usr/sbin)' 2>/dev/null`"
+  
+#can we read /root
+lse_test "fs030" "1" "Can we read /root?" "`ls -ahl /root/ 2>/dev/null`"
+
+#check /home permissions
+lse_test "fs040" "1" "Can we read subdirectories under /home?" "`for h in /home/*; do [ -d "$h" ] && [ "$h" != "$lse_home" ] && ls -la "$h/"; done  2>/dev/null`"
+
+#check for SSH files in home directories
+lse_test "fs050" "1" "SSH files in home directories" "`for h in $(cut -d: -f6 /etc/passwd); do find "$h" \( -name "*id_dsa*" -o -name "*id_rsa*" -o -name "known_hosts" -o -name "authorized_hosts" -o -name "authorized_keys" \) -exec ls -la {} 2>/dev/null \; ; done 2>/dev/null`"
+
+#files owned by user
+[ $lse_level -ge 2 ] && lse_test "fs060" "2" "Files owned by $lse_user" "`find / -user $lse_user -type f ! -path "/proc/*" ! -path "/sys/*" -exec ls -al {} \; 2>/dev/null`"
+
+
+#######################################################################( system
+lse_header "system"
+
+#who is logged in
+[ $lse_level -ge 2 ] && lse_test "sys000" "2" "Who is logged in" "`w 2>/dev/null`"
+
+#last logged in users
+[ $lse_level -ge 2 ] && lse_test "sys010" "2" "Last logged in users" "`last 2>/dev/null`"
+
+#check if /etc/passwd has the hashes (old system)
+lse_test "sys020" "0" "Does the /etc/passwd have hashes?" "`grep -v '^[^:]*:[x]' /etc/passwd 2>/dev/null`"
+
+#check if we can read any shadow file
+for s in 'shadow' 'shadow-' 'shadow~' 'master.passwd'; do
+  lse_test "sys030" "0" "Can we read /etc/$s file?" "`cat /etc/$s 2>/dev/null`"
+done
+
+#check for superuser accounts
+lse_test "sys040" "1" "Check for other superuser accounts" "`for u in $(cut -d: -f1 /etc/passwd); do [ $(id -u $u) == 0 ] && echo $u; done 2>/dev/null | grep -v root`"
+
+#can root log in via SSH
+lse_test "sys050" "1" "Can user log in via SSH?" "`(grep -E '^[[:space:]]*PermitRootLogin ' /etc/ssh/sshd_config | grep -E '(yes|without-password)')2>/dev/null`"
 
 #
 ##)
