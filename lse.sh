@@ -191,6 +191,9 @@ lse_show_info() {
     cecho "******"
   fi
   cecho    "${lblue}        Home:${reset} $lse_home"
+  cecho    "${lblue}        Path:${reset} $PATH"
+  cecho    "${lblue}       umask:${reset} `umask 2>/dev/null`"
+
   echo
   cecho    "${lblue}    Hostname:${reset} $lse_hostname"
   cecho    "${lblue}       Linux:${reset} $lse_linux"
@@ -221,6 +224,7 @@ done
 
 lse_request_information
 lse_show_info
+PATH="$PATH:/sbin:/usr/sbin" #fix path just in case
 #)
 
 ########################################################################( TESTS
@@ -244,12 +248,17 @@ lse_test "usr020" "1" "Are there other users in an administrative groups?" "`(gr
 
 #other users with shell
 lse_test "usr030" "1" "Other users with shell" "` grep -E 'sh$' /etc/passwd 2>/dev/null`"
+  
+if [ $lse_level -ge 2 ]; then
+  #user env information
+  lse_test "usr040" "2" "Environment information" "`(env | grep -v 'LS_COLORS')2>/dev/null`"
 
-#dump user groups
-[ $lse_level -ge 2 ] && lse_test "usr040" "2" "Groups for other users" "`cat /etc/group 2>/dev/null`"
+  #dump user groups
+  lse_test "usr050" "2" "Groups for other users" "`cat /etc/group 2>/dev/null`"
 
-#dump users
-[ $lse_level -ge 2 ] && lse_test "usr050" "2" "Other users" "`cat /etc/passwd 2>/dev/null`"
+  #dump users
+  lse_test "usr060" "2" "Other users" "`cat /etc/passwd 2>/dev/null`"
+fi
 
 
 #########################################################################( sudo
@@ -292,7 +301,9 @@ lse_test "sud050" "1" "Do we know if any other users used sudo?" "`for uh in $(c
 lse_header "file system"
 
 #writable files outside user's home
-lse_user_writable="`find / -writable -not -path "$HOME/*" 2>/dev/null`"
+lse_user_writable="`find  / \! -type l -writable -not -path "$HOME/*" -not -path "/proc/*" -not -path "/sys/*" -not -path "/dev/*" -not -path "/run/*" 2>/dev/null`"
+# Add symlinks owned by the user (so the user can change where they point)
+lse_user_writable+="`find  / -type l -user $lse_user -not -path "$HOME/*" -not -path "/proc/*" -not -path "/sys/*" -not -path "/dev/*" -not -path "/run/*" 2>/dev/null`"
 lse_test "fs000" "1" "Writable files outside users home" "$lse_user_writable"
 
 #get setuid binaries
@@ -312,18 +323,25 @@ lse_test "fs040" "1" "Can we read subdirectories under /home?" "`for h in /home/
 #check for SSH files in home directories
 lse_test "fs050" "1" "SSH files in home directories" "`for h in $(cut -d: -f6 /etc/passwd); do find "$h" \( -name "*id_dsa*" -o -name "*id_rsa*" -o -name "known_hosts" -o -name "authorized_hosts" -o -name "authorized_keys" \) -exec ls -la {} 2>/dev/null \; ; done 2>/dev/null`"
 
-#files owned by user
-[ $lse_level -ge 2 ] && lse_test "fs060" "2" "Files owned by $lse_user" "`find / -user $lse_user -type f ! -path "/proc/*" ! -path "/sys/*" -exec ls -al {} \; 2>/dev/null`"
+if [ $lse_level -ge 2 ]; then
+  #files owned by user
+  lse_test "fs060" "2" "Files owned by $lse_user" "`find / -user $lse_user -type f ! -path "/proc/*" ! -path "/sys/*" -exec ls -al {} \; 2>/dev/null`"
+
+  #check for SSH files anywhere
+  lse_test "fs070" "2" "SSH files anywhere" "`find / \( -name "*id_dsa*" -o -name "*id_rsa*" -o -name "known_hosts" -o -name "authorized_hosts" -o -name "authorized_keys" \) -exec ls -la {} 2>/dev/null \;`"
+fi
 
 
 #######################################################################( system
 lse_header "system"
 
-#who is logged in
-[ $lse_level -ge 2 ] && lse_test "sys000" "2" "Who is logged in" "`w 2>/dev/null`"
+if [ $lse_level -ge 2 ]; then
+  #who is logged in
+  lse_test "sys000" "2" "Who is logged in" "`w 2>/dev/null`"
 
-#last logged in users
-[ $lse_level -ge 2 ] && lse_test "sys010" "2" "Last logged in users" "`last 2>/dev/null`"
+  #last logged in users
+  lse_test "sys010" "2" "Last logged in users" "`last 2>/dev/null`"
+fi
 
 #check if /etc/passwd has the hashes (old system)
 lse_test "sys020" "0" "Does the /etc/passwd have hashes?" "`grep -v '^[^:]*:[x]' /etc/passwd 2>/dev/null`"
@@ -338,6 +356,178 @@ lse_test "sys040" "1" "Check for other superuser accounts" "`for u in $(cut -d: 
 
 #can root log in via SSH
 lse_test "sys050" "1" "Can user log in via SSH?" "`(grep -E '^[[:space:]]*PermitRootLogin ' /etc/ssh/sshd_config | grep -E '(yes|without-password)')2>/dev/null`"
+  
+if [ $lse_level -ge 2 ]; then
+  #list available shells
+  lse_test "sys060" "2" "List available shells" "`cat /etc/shells 2>/dev/null`"
+
+  #system umask
+  lse_test "sys070" "2" "System umask in /etc/login.defs" "`grep "^UMASK" /etc/login.defs 2>/dev/null`"
+
+  #system password policies
+  lse_test "sys080" "2" "System password policies in /etc/login.defs" "`grep "^PASS_MAX_DAYS\|^PASS_MIN_DAYS\|^PASS_WARN_AGE\|^ENCRYPT_METHOD" /etc/login.defs 2>/dev/null`"
+fi
+
+######################################################################( selinux 
+lse_header "selinux"
+
+#check if selinux is present
+lse_test "sel000" "1" "Is SELinux present?" "`sestatus 2>/dev/null`"
+
+if lse_test_passed "sel000"; then
+  sleep 0.1
+fi
+
+
+##############################################################( recurrent tasks 
+lse_header "recurrent tasks"
+
+## CRON
+#user crontab
+lse_test "ret000" "1" "User crontab" "`(crontab -l | grep -Ev '^#')2>/dev/null`"
+
+#cron tasks writable by user
+lse_test "ret010" "0" "Cron tasks writable by user" "`echo -e "$lse_user_writable" | grep -E '^/(etc/anacron|etc/cron|var/spool/cron)'`"
+
+#list cron jobs
+lse_test "ret020" "1" "Cron jobs" "`grep -ERv '^(#|$)' /etc/crontab /etc/cron.d/ /etc/anacrontab 2>/dev/null`"
+
+#can we read other user crontabs?
+lse_test "ret030" "1" "Can we read user crontabs" "`(ls -la /var/spool/cron/crontabs/*)2>/dev/null`"
+
+#can we list other user cron tasks? (you need privileges for this, so if you can something is fishy)
+lse_test "ret040" "1" "Can we list other user cron tasks?" "`for u in $(cut -d: -f 1 /etc/passwd); do [ "$u" != "$lse_user" ] && crontab -l -u "$u"; done 2>/dev/null`"
+
+#list cron files
+[ $lse_level -ge 2 ] && lse_test "ret400" "2" "Cron files" "`ls -la /etc/cron* 2>/dev/null`"
+
+
+## Systemd Timers
+#user timers
+lse_test "ret500" "1" "User systemd timers" "`(systemctl --user list-timers --all | grep -Ev '(^$|timers listed)')2> /dev/null`"
+
+#can we write in any system timer?
+lse_test "ret510" "0" "Can we write in any system timer?" "`echo -e "$lse_user_writable" | grep -E '\.timer$'`"
+
+#system timers
+[ $lse_level -ge 2 ] && lse_test "ret900" "2" "Systemd timers" "`systemctl list-timers --all 2> /dev/null`"
+
+
+######################################################################( network
+lse_header "network"
+
+#services listening only on localhost
+lse_test "net000" "1" "Services listening only on localhost" "`(ss -tunlp || netstat -tunlp)2>/dev/null | grep '127.0.0.1:'`"
+
+#can we execute tcpdump
+lse_test "net010" "0" "Can we sniff traffic with tcpdump?" "`(tcpdump -i lo -n 2>&1 & pid=$!;sleep 0.2;kill $pid)2>/dev/null | grep -i 'listening on lo'`"
+
+if [ $lse_level -ge 2 ]; then
+  #nic information
+  lse_test "net500" "2" "NIC and IP information" "`(ifconfig -a || ip a)2>/dev/null`"
+
+  #routing table
+  lse_test "net510" "2" "Routing table" "`(route -n || ip r)2>/dev/null`"
+
+  #arp table
+  lse_test "net520" "2" "ARP table" "`(arp -an || ip n)2>/dev/null`"
+
+  #nameservers
+  lse_test "net530" "2" "Namerservers" "`grep "nameserver" /etc/resolv.conf 2>/dev/null`"
+
+  #systemd nameservers
+  lse_test "net540" "2" "Systemd Nameservers" "`(systemd-resolve --status || systemd-resolve --user --status)2>/dev/null`"
+
+  #listening TCP
+  lse_test "net550" "2" "Listening TCP" "`(netstat -tnlp || ss -tnlp)2>/dev/null`"
+  
+  #listening UDP
+  lse_test "net560" "2" "Listening UDP" "`(netstat -unlp || ss -unlp)2>/dev/null`"
+fi
+
+
+#####################################################################( services
+lse_header "services"
+
+## System-V
+#check write permissions in init.d/* inetd.conf xinetd.conf
+lse_test "srv000" "0" "Can we write in service files?" "`echo -e "$lse_user_writable" | grep -E '^/etc/(init/|init\.d/|rc\.d/|rc[0-9S]\.d/|rc\.local|inetd\.conf|xinetd\.conf|xinetd\.d/)'`"
+
+#check write permissions for binaries involved in services
+lse_test "srv010" "0" "Can we write in binaries executed by services?" "`
+for b in $(grep -ERvh '^#' /etc/inetd.conf /etc/xinetd.conf /etc/xinetd.d/ /etc/init.d/ /etc/rc* 2>/dev/null | tr -s '[[:space:]]' '\n' | grep -E '^/' | grep -Ev '^/(dev|run|sys|proc|tmp)/' | sort | uniq); do
+  [ -x "$b" ] && [ -w "$b" ] && echo "$b"
+done`"
+
+#init.d files NOT belonging to root
+lse_test "srv020" "1" "Files in /etc/init.d/ not belonging to root" "`(find /etc/init.d/ \! -uid 0 -type f | xargs -r ls -la )2>/dev/null`"
+
+#rc.d/init.d files NOT belonging to root!
+lse_test "srv030" "1" "Files in /etc/rc.d/init.d not belonging to root" "`(find /etc/rc.d/init.d \! -uid 0 -type f | xargs -r ls -la )2>/dev/null`"
+
+# upstart scripts not belonging to root
+lse_test "srv040" "1" "Upstart files not belonging to root" "`(find /etc/init \! -uid 0 -type f | xargs -r ls -la )2>/dev/null`"
+
+#/usr/local/etc/rc.d files NOT belonging to root!
+lse_test "srv050" "1" "Files in /usr/local/etc/rc.d not belonging to root" "`(find /usr/local/etc/rc.d \! -uid 0 -type f | xargs -r ls -la )2>/dev/null`"
+
+if [ $lse_level -ge 2 ]; then
+  #contents of inetd.conf
+  lse_test "srv400" "Contents of /etc/inetd.conf" "`cat /etc/inetd.conf 2>/dev/null`"
+
+  #xinetd info
+  lse_test "srv410" "2" "Contents of /etc/xinetd.conf" "`cat /etc/xinetd.conf 2>/dev/null`"
+
+  #check xinetd.d and permissions
+  lse_test "srv420" "2" "List /etc/xinetd.d if used" "`grep "/etc/xinetd.d" /etc/xinetd.conf 2>/dev/null; ls -la /etc/xinetd.d 2>/dev/null `"
+
+  #permissions of init.d scripts
+  lse_test "srv430" "2" "List /etc/init.d/ permissions" "`ls -la /etc/init.d 2>/dev/null`"
+
+  #rc.d/init.d permissions
+  lse_test "srv440" "2" "List /etc/rc.d/init.d permissions" "`ls -la /etc/rc.d/init.d 2>/dev/null`"
+
+  #usr/rc.d permissions
+  lse_test "srv450" "2" "List /usr/local/etc/rc.d permissions" "`ls -la /usr/local/etc/rc.d 2>/dev/null`"
+
+  # init permissions
+  lse_test "srv460" "2" "List /etc/init/ permissions" "`ls -la /etc/init/ 2>/dev/null`"
+fi
+
+## Systemd
+#check write permissions in systemd services
+lse_test "srv500" "0" "Can we write in systemd service files?" "`echo -e "$lse_user_writable" | grep -E '^/(etc/systemd/|lib/systemd/).+\.service$'`"
+
+#check write permissions for binaries involved in systemd services
+lse_test "srv510" "0" "Can we write in binaries executed by systemd services?" "`
+for b in $(grep -ERh '^Exec' /etc/systemd/ /lib/systemd/ 2>/dev/null | tr '=' '\n' | tr -s '[[:space:]]' '\n' | grep -E '^/' | grep -Ev '^/(dev|run|sys|proc|tmp)/' | sort | uniq); do
+  [ -x "$b" ] && [ -w "$b" ] && echo "$b"
+done`"
+
+# systemd files not belonging to root
+lse_test "srv520" "1" "Systemd files not belonging to root" "`(find /lib/systemd/ /etc/systemd \! -uid 0 -type f 2>/dev/null | xargs -r ls -la )2>/dev/null`"
+
+if [ $lse_level -ge 2 ]; then
+  # systemd permissions
+  lse_test "srv900" "2" "Systemd config files permissions" "`ls -lthR /lib/systemd/ /etc/systemd/ 2>/dev/null`"
+fi
+
+#####################################################################( processes
+lse_header "processes"
+
+#lookup process binaries
+lse_proc_bin=`(ps -eo comm | sort | uniq | xargs which)2>/dev/null`
+
+#check if we have wire permissions in any process binary
+lse_test "ps000" "0" "Can we write in any process binary?" "`for b in $lse_proc_bin; do [ -w "$b" ] && echo $b; done 2>/dev/null`"
+
+if [ $lse_level -ge 2 ]; then
+  #running processes
+  lse_test "ps500" "2" "Running processes" "`ps auxf 2>/dev/null`"
+
+  #list running process binaries and their permissions
+  lse_test "ps510" "2" "Running process binaries and permissions" "`echo -e "$lse_proc_bin" | xargs -n1 ls -l 2>/dev/null`"
+fi
 
 #
 ##)
