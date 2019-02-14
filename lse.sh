@@ -307,28 +307,44 @@ lse_user_writable+="`find  / -type l -user $lse_user -not -path "$HOME/*" -not -
 lse_test "fs000" "1" "Writable files outside users home" "$lse_user_writable"
 
 #get setuid binaries
-lse_setuid_binaries="`find / -perm -4000 2> /dev/null`"
+lse_setuid_binaries="`find / -perm -4000 -type f 2> /dev/null`"
 lse_test "fs010" "1" "Binaries with setuid bit" "$lse_setuid_binaries"
 
-#uncommon setuid binaries
-lse_test_passed "fs010" && \
+if lse_test_passed "fs010"; then
+  #uncommon setuid binaries
   lse_test "fs020" "0" "Uncommon setuid binaries" "`echo -e "$lse_setuid_binaries" | grep -Ev '^/(bin|sbin|usr/bin|usr/lib|usr/sbin)' 2>/dev/null`"
+
+  #can we write to any setuid binary
+  lse_test "fs030" "0" "Can we write to any setuid binary?" "`for b in $lse_setuid_binaries; do [ -x "$b" ] && [ -w "$b" ] && echo "$b" ;done`"
+fi
+
+#get setgid binaries
+lse_setgid_binaries="`find / -perm -2000 -type f 2> /dev/null`"
+lse_test "fs040" "1" "Binaries with setgid bit" "$lse_setgid_binaries"
+
+if lse_test_passed "fs040"; then
+  #uncommon setgid binaries
+  lse_test "fs050" "0" "Uncommon setgid binaries" "`echo -e "$lse_setgid_binaries" | grep -Ev '^/(bin|sbin|usr/bin|usr/lib|usr/sbin)' 2>/dev/null`"
+
+  #can we write to any setgid binary
+  lse_test "fs060" "0" "Can we write to any setgid binary?" "`for b in $lse_setgid_binaries; do [ -x "$b" ] && [ -w "$b" ] && echo "$b" ;done`"
+fi
   
 #can we read /root
-lse_test "fs030" "1" "Can we read /root?" "`ls -ahl /root/ 2>/dev/null`"
+lse_test "fs070" "1" "Can we read /root?" "`ls -ahl /root/ 2>/dev/null`"
 
 #check /home permissions
-lse_test "fs040" "1" "Can we read subdirectories under /home?" "`for h in /home/*; do [ -d "$h" ] && [ "$h" != "$lse_home" ] && ls -la "$h/"; done  2>/dev/null`"
+lse_test "fs080" "1" "Can we read subdirectories under /home?" "`for h in /home/*; do [ -d "$h" ] && [ "$h" != "$lse_home" ] && ls -la "$h/"; done  2>/dev/null`"
 
 #check for SSH files in home directories
-lse_test "fs050" "1" "SSH files in home directories" "`for h in $(cut -d: -f6 /etc/passwd); do find "$h" \( -name "*id_dsa*" -o -name "*id_rsa*" -o -name "known_hosts" -o -name "authorized_hosts" -o -name "authorized_keys" \) -exec ls -la {} 2>/dev/null \; ; done 2>/dev/null`"
+lse_test "fs090" "1" "SSH files in home directories" "`for h in $(cut -d: -f6 /etc/passwd); do find "$h" \( -name "*id_dsa*" -o -name "*id_rsa*" -o -name "known_hosts" -o -name "authorized_hosts" -o -name "authorized_keys" \) -exec ls -la {} 2>/dev/null \; ; done 2>/dev/null`"
 
 if [ $lse_level -ge 2 ]; then
   #files owned by user
-  lse_test "fs060" "2" "Files owned by $lse_user" "`find / -user $lse_user -type f ! -path "/proc/*" ! -path "/sys/*" -exec ls -al {} \; 2>/dev/null`"
+  lse_test "fs500" "2" "Files owned by $lse_user" "`find / -user $lse_user -type f ! -path "/proc/*" ! -path "/sys/*" -exec ls -al {} \; 2>/dev/null`"
 
   #check for SSH files anywhere
-  lse_test "fs070" "2" "SSH files anywhere" "`find / \( -name "*id_dsa*" -o -name "*id_rsa*" -o -name "known_hosts" -o -name "authorized_hosts" -o -name "authorized_keys" \) -exec ls -la {} 2>/dev/null \;`"
+  lse_test "fs510" "2" "SSH files anywhere" "`find / \( -name "*id_dsa*" -o -name "*id_rsa*" -o -name "known_hosts" -o -name "authorized_hosts" -o -name "authorized_keys" \) -exec ls -la {} 2>/dev/null \;`"
 fi
 
 
