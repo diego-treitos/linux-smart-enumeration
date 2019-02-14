@@ -622,6 +622,26 @@ lse_run_tests_software() {
   fi
 }
 
+###################################################################( containers
+lse_run_tests_containers() {
+  lse_header "containers"
+
+  #check to see if we are in a docker container
+  lse_test "ct000" "1" "Are we in a docker container?" "`(grep -i docker /proc/self/cgroup; find / -name "*dockerenv*" -exec ls -la {} \; )2>/dev/null`"
+
+  #check to see if current host is running docker services
+  lse_test "ct010" "1" "Is docker available?" "`(docker --version; docker ps -a)2>/dev/null`"
+
+  #is user a member of the docker group
+  lse_test "ct020" "0" "Is the user a member of the 'docker' group?" "`groups | grep -o docker`"
+
+  #check to see if we are in an lxc container
+  lse_test "ct200" "1" "Are we in a lxc container?" "`grep -qa container=lxc /proc/1/environ 2>/dev/null`"
+
+  #is user a member of any lxd/lxc group
+  lse_test "ct210" "0" "Is the user a member of any lxc/lxd group?" "`groups | grep  "lxc|lxd"`"
+}
+
 #
 ##)
 
@@ -651,5 +671,6 @@ lse_run_tests_network
 lse_run_tests_services
 lse_run_tests_processes
 lse_run_tests_software
+lse_run_tests_containers
 #)
 
