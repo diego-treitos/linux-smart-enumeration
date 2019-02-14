@@ -1,6 +1,10 @@
 # linux-smart-enumeration
 Linux enumeration tools for pentesting and CTFs
 
+This project was inspired by https://github.com/rebootuser/LinEnum and uses
+many of its tests.
+
+Unlike LinEnum, `lse` tries to gradualy expose the information depending on its importance from a privesc point of view.
 
 ## What is it?
 
