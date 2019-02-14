@@ -520,7 +520,8 @@ if [ $lse_level -ge 2 ]; then
   lse_test "srv900" "2" "Systemd config files permissions" "`ls -lthR /lib/systemd/ /etc/systemd/ 2>/dev/null`"
 fi
 
-#####################################################################( processes
+
+####################################################################( processes
 lse_header "processes"
 
 #lookup process binaries
@@ -535,6 +536,42 @@ if [ $lse_level -ge 2 ]; then
 
   #list running process binaries and their permissions
   lse_test "ps510" "2" "Running process binaries and permissions" "`echo -e "$lse_proc_bin" | xargs -n1 ls -l 2>/dev/null`"
+fi
+
+
+#####################################################################( software
+lse_header "software"
+
+#checks to see if root/root will get us a connection
+lse_test "sw000" "0" "Can we connect to MySQL with root/root credentials?" "`mysqladmin -uroot -proot version 2>/dev/null`"
+
+#checks to see if we can connect as root without password
+lse_test "sw010" "0" "Can we connect to MySQL as root without password?" "`mysqladmin -uroot version 2>/dev/null`"
+
+#checks to see if we can connect to postgres templates without password
+lse_test "sw020" "0" "We can connect to Postgres DB 'template0' as user 'postgres' with no password!" "`psql -U postgres template0 -c 'select version()' 2>/dev/null | grep version`"
+lse_test "sw020" "0" "We can connect to Postgres DB 'template1' as user 'postgres' with no password!" "`psql -U postgres template1 -c 'select version()' 2>/dev/null | grep version`"
+lse_test "sw020" "0" "We can connect to Postgres DB 'template0' as user 'psql' with no password!" "`psql -U pgsql template0 -c 'select version()' 2>/dev/null | grep version`"
+lse_test "sw020" "0" "We can connect to Postgres DB 'template1' as user 'psql' with no password!" "`psql -U pgsql template1 -c 'select version()' 2>/dev/null | grep version`"
+
+#installed apache modules
+lse_test "sw030" "1" "Installed apache modules" "`(apache2ctl -M; httpd -M)2>/dev/null`"
+
+#find htpassword files
+lse_test "sw040" "0" "Found any .htpasswd files?" "`find / -name "*.htpasswd" -print -exec cat {} \; 2>/dev/null`"
+
+if [ $lse_level -ge 2 ]; then
+  #sudo version - check to see if there are any known vulnerabilities with this
+  lse_test "sw500" "2" "Sudo version" "`(sudo -V | grep "Sudo version")2>/dev/null`"
+
+  #mysql details - if installed
+  lse_test "sw510" "2" "MySQL version" "`mysql --version 2>/dev/null`"
+
+  #postgres details - if installed
+  lse_test "sw520" "2" "Postgres version" "`psql -V 2>/dev/null`"
+
+  #apache details - if installed
+  lse_test "sw530" "2" "Apache version" "`(apache2 -v; httpd -v )2>/dev/null`"
 fi
 
 #
