@@ -565,10 +565,10 @@ lse_test "sw000" "0" "Can we connect to MySQL with root/root credentials?" "`mys
 lse_test "sw010" "0" "Can we connect to MySQL as root without password?" "`mysqladmin -uroot version 2>/dev/null`"
 
 #checks to see if we can connect to postgres templates without password
-lse_test "sw020" "0" "We can connect to Postgres DB 'template0' as user 'postgres' with no password!" "`psql -U postgres template0 -c 'select version()' 2>/dev/null | grep version`"
-lse_test "sw020" "0" "We can connect to Postgres DB 'template1' as user 'postgres' with no password!" "`psql -U postgres template1 -c 'select version()' 2>/dev/null | grep version`"
-lse_test "sw020" "0" "We can connect to Postgres DB 'template0' as user 'psql' with no password!" "`psql -U pgsql template0 -c 'select version()' 2>/dev/null | grep version`"
-lse_test "sw020" "0" "We can connect to Postgres DB 'template1' as user 'psql' with no password!" "`psql -U pgsql template1 -c 'select version()' 2>/dev/null | grep version`"
+lse_test "sw020" "0" "Can we connect to PostgreSQL template0 as postgres with no password?" "`psql -U postgres template0 -c 'select version()' 2>/dev/null | grep version`"
+lse_test "sw020" "0" "Can we connect to PostgreSQL template1 as postgres with no password?" "`psql -U postgres template1 -c 'select version()' 2>/dev/null | grep version`"
+lse_test "sw020" "0" "Can we connect to PostgreSQL template0 as psql with no password?" "`psql -U pgsql template0 -c 'select version()' 2>/dev/null | grep version`"
+lse_test "sw020" "0" "Can we connect to PostgreSQL template1 as psql with no password?" "`psql -U pgsql template1 -c 'select version()' 2>/dev/null | grep version`"
 
 #installed apache modules
 lse_test "sw030" "1" "Installed apache modules" "`(apache2ctl -M; httpd -M)2>/dev/null`"
