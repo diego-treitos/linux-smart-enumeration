@@ -69,6 +69,7 @@ lse_user="$USER"
 [ -z "$lse_user" ] && lse_user="`id -nu`"
 lse_pass=""
 lse_home="$HOME"
+[ -z "$lse_home" ] && lse_home="`(grep -E "^$lse_user:" /etc/passwd | cut -d: -f6)2>/dev/null`"
 
 # system
 lse_arch="`uname -m`"
