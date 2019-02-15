@@ -295,7 +295,7 @@ lse_run_tests_filesystem() {
   lse_user_writable="`find  / \! -type l -writable -not -path "$HOME/*" -not -path "/proc/*" -not -path "/sys/*" -not -path "/dev/*" -not -path "/run/*" 2>/dev/null`"
   # Add symlinks owned by the user (so the user can change where they point)
   lse_user_writable+="`find  / -type l -user $lse_user -not -path "$HOME/*" -not -path "/proc/*" -not -path "/sys/*" -not -path "/dev/*" -not -path "/run/*" 2>/dev/null`"
-  lse_test "fs000" "1" "Writable files outside users home" "$lse_user_writable"
+  lse_test "fs000" "1" "Writable files outside user's home" "$lse_user_writable"
 
   #get setuid binaries
   lse_setuid_binaries="`find / -perm -4000 -type f 2> /dev/null`"
