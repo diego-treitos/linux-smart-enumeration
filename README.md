@@ -27,3 +27,13 @@ First you should execute it just like `./lse.sh`. If you see some green `yes!`, 
 If not, you should try the `level 1` verbosity with `./lse.sh -l1` and you will see some more information that can be interesting.
 
 If that does not help, `level 2` will just dump everything you can gather about the service using `./lse.sh -l2`. In this case you might find useful to use `./lse.sh -l2 | less -r`.
+
+```
+Use: ./lse.sh [options]
+
+ OPTIONS
+   -c       Disable color
+   -i       Non interactive mode
+   -h       This help
+   -l LEVEL Output verbosity level (0:default, 1:interesting, 2:all)
+```
