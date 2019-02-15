@@ -387,7 +387,7 @@ lse_run_tests_system() {
   lse_test "sys040" "1" "Check for other superuser accounts" "`for u in $(cut -d: -f1 /etc/passwd); do [ $(id -u $u) == 0 ] && echo $u; done 2>/dev/null | grep -v root`"
 
   #can root log in via SSH
-  lse_test "sys050" "1" "Can user log in via SSH?" "`(grep -E '^[[:space:]]*PermitRootLogin ' /etc/ssh/sshd_config | grep -E '(yes|without-password)')2>/dev/null`"
+  lse_test "sys050" "1" "Can root user log in via SSH?" "`(grep -E '^[[:space:]]*PermitRootLogin ' /etc/ssh/sshd_config | grep -E '(yes|without-password)')2>/dev/null`"
     
   if [ $lse_level -ge 2 ]; then
     #list available shells
