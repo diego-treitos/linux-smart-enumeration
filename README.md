@@ -17,3 +17,13 @@ interesting information that should help you to privesc. The level `2` (`./lse.s
 gathers about the system.
 
 By default it will ask you some questions: mainly the current user password (if you know it ;) so it can do some additional tests.
+
+## How to use it?
+
+The idea is to get the information gradually.
+
+First you should execute it just like `./lse.sh`. If you see some green `yes!`, you probably have already some good stuff to work with.
+
+If not, you should try the `level 1` verbosity with `./lse.sh -l1` and you will see some more information that can be interesting.
+
+If that does not help, `level 2` will just dump everything you can gather about the service using `./lse.sh -l2`.
