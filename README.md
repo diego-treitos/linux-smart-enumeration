@@ -28,12 +28,31 @@ If not, you should try the `level 1` verbosity with `./lse.sh -l1` and you will 
 
 If that does not help, `level 2` will just dump everything you can gather about the service using `./lse.sh -l2`. In this case you might find useful to use `./lse.sh -l2 | less -r`.
 
+You can also select what tests to execute by passing the `-s` parameter. With it you can select specific tests or sections to be executed. For example `./lse.sh -l2 -s usr010,net,pro` will execute the test `usr010` and all the tests in the sections `net` and `pro`. 
+
 ```
 Use: ./lse.sh [options]
 
  OPTIONS
-   -c       Disable color
-   -i       Non interactive mode
-   -h       This help
-   -l LEVEL Output verbosity level (0:default, 1:interesting, 2:all)
+   -c           Disable color
+   -i           Non interactive mode
+   -h           This help
+   -l LEVEL     Output verbosity level
+                  0: Show highly important results. (default)
+                  1: Show interesting results.
+                  2: Show all gathered information.
+   -s SELECTION Comma separated list of sections or tests to run. Available
+                sections:
+                  usr: User related tests.
+                  sud: Sudo related tests.
+                  fst: File system related tests.
+                  sys: System related tests.
+                  sec: Security measures related tests.
+                  ret: Recurren tasks (cron, timers) related tests.
+                  net: Network related tests.
+                  srv: Services related tests.
+                  pro: Processes related tests.
+                  sof: Software related tests.
+                  ctn: Container (docker, lxc) related tests.
+                Specific tests can be used with their IDs (i.e.: usr020,sud)
 ```
