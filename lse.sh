@@ -79,7 +79,7 @@ lse_hostname="`hostname`"
 # lse
 lse_passed_tests=""
 lse_executed_tests=""
-lse_DEBUG=true
+lse_DEBUG=false
 #)
 
 #( Options
@@ -116,10 +116,27 @@ lse_help() {
   echo "Use: $0 [options]" 
   echo
   echo " OPTIONS"
-  echo "   -c       Disable color"
-  echo "   -i       Non interactive mode"
-  echo "   -h       This help"
-  echo "   -l LEVEL Output verbosity level (0:default, 1:interesting, 2:all)"
+  echo "   -c           Disable color"
+  echo "   -i           Non interactive mode"
+  echo "   -h           This help"
+  echo "   -l LEVEL     Output verbosity level"
+  echo "                  0: Show highly important results. (default)"
+  echo "                  1: Show interesting results."
+  echo "                  2: Show all gathered information."
+  echo "   -s SELECTION Comma separated list of sections or tests to run. Available"
+  echo "                sections:"
+  echo "                  usr: User related tests."
+  echo "                  sud: Sudo related tests."
+  echo "                  fst: File system related tests."
+  echo "                  sys: System related tests."
+  echo "                  sec: Security measures related tests."
+  echo "                  ret: Recurren tasks (cron, timers) related tests."
+  echo "                  net: Network related tests."
+  echo "                  srv: Services related tests."
+  echo "                  pro: Processes related tests."
+  echo "                  sof: Software related tests."
+  echo "                  ctn: Container (docker, lxc) related tests."
+  echo "                Specific tests can be used with their IDs (i.e.: usr020,sud)"
 }
 lse_ask() {
   local question="$1"
@@ -172,11 +189,23 @@ lse_test() {
   [ $level -eq 1 ] && l="${lyellow}*" && r="${cyan}"
   [ $level -eq 2 ] && l="${lblue}i" && r="${blue}"
 
+  # Filter selected tests
+  if [ "$lse_selection" ]; then
+    local sel_match=false
+    for s in $lse_selection; do
+      if [ "$s" == "$id" ] || [ "$s" == "${id:0:3}" ]; then
+        sel_match=true
+      fi
+    done
+    $sel_match || return 0
+  fi
+
+  # DEBUG messages
   $lse_DEBUG && cecho "${lmagenta}DEBUG: ${lgreen}Executing: ${reset}$cmd"
 
   # Print name and line
-  cecho -n "${white}[${l}${white}] $name${grey}"
-  for i in $(seq $((${#name}+4)) 74); do
+  cecho -n "${white}[${l}${white}] ${grey}${id}${white} $name${grey}"
+  for i in $(seq $((${#name}+4)) 67); do
     echo -n "."
   done
 
@@ -249,8 +278,23 @@ lse_show_info() {
   echo
 }
 lse_header() {
+  local id="$1"
+  shift
   local title="$*"
   local text="${magenta}"
+
+  # Filter selected tests
+  if [ "$lse_selection" ]; then
+    local sel_match=false
+    for s in $lse_selection; do
+      if [ "${s:0:3}" == "$id" ]; then
+        sel_match=true
+        break
+      fi
+    done
+    $sel_match || return 0
+  fi
+
   for i in $(seq ${#title} 70); do
     text+="="
   done
@@ -266,7 +310,7 @@ lse_header() {
 #
 ########################################################################( users 
 lse_run_tests_users() {
-  lse_header "users"
+  lse_header "usr" "users"
 
   #user groups
   lse_test "usr000" "2" \
@@ -309,7 +353,7 @@ lse_run_tests_users() {
 
 #########################################################################( sudo
 lse_run_tests_sudo() {
-  lse_header "sudo"
+  lse_header "sud" "sudo"
 
   #variables for sudo checks
   lse_sudo=false
@@ -359,7 +403,7 @@ lse_run_tests_sudo() {
 
 ##################################################################( file system
 lse_run_tests_filesystem() {
-  lse_header "file system"
+  lse_header "fst" "file system"
 
   #writable files outside user's home
   lse_test "fst000" "1" \
@@ -476,7 +520,7 @@ lse_run_tests_filesystem() {
 
 #######################################################################( system
 lse_run_tests_system() {
-  lse_header "system"
+  lse_header "sys" "system"
 
   #who is logged in
   lse_test "sys000" "2" \
@@ -529,7 +573,7 @@ lse_run_tests_system() {
 
 #####################################################################( security
 lse_run_tests_security() {
-  lse_header "security"
+  lse_header "sec" "security"
 
   #check if selinux is present
   lse_test "sec000" "1" \
@@ -556,7 +600,7 @@ lse_run_tests_security() {
   #search /etc/security/capability.conf for users associated capapilies
   lse_test "sec040" "1" \
     "Users with associated capabilities" \
-    'grep -v "^#\|none\|^$" /etc/security/capability.conf'
+    'grep -v "^#\|none\|^$" /etc/security/capability.conf' \
     "" \
     "lse_user_caps"
 
@@ -570,7 +614,7 @@ lse_run_tests_security() {
 
 ##############################################################( recurrent tasks 
 lse_run_tests_recurrent_tasks() {
-  lse_header "recurrent tasks"
+  lse_header "ret" "recurrent tasks"
 
   ## CRON
   #user crontab
@@ -624,7 +668,7 @@ lse_run_tests_recurrent_tasks() {
 
 ######################################################################( network
 lse_run_tests_network() {
-  lse_header "network"
+  lse_header "net" "network"
 
   #services listening only on localhost
   lse_test "net000" "1" \
@@ -675,7 +719,7 @@ lse_run_tests_network() {
 
 #####################################################################( services
 lse_run_tests_services() {
-  lse_header "services"
+  lse_header "srv" "services"
 
   ## System-V
   #check write permissions in init.d/* inetd.conf xinetd.conf
@@ -768,7 +812,7 @@ lse_run_tests_services() {
 
 ####################################################################( processes
 lse_run_tests_processes() {
-  lse_header "processes"
+  lse_header "pro" "processes"
 
   #lookup process binaries
   lse_proc_bin=`(ps -eo comm | sort | uniq | xargs which)2>/dev/null`
@@ -792,7 +836,7 @@ lse_run_tests_processes() {
 
 #####################################################################( software
 lse_run_tests_software() {
-  lse_header "software"
+  lse_header "sof" "software"
 
   #checks to see if root/root will get us a connection
   lse_test "sof000" "0" \
@@ -806,16 +850,16 @@ lse_run_tests_software() {
 
   #checks to see if we can connect to postgres templates without password
   lse_test "sof020" "0" \
-    "Can we connect to PostgreSQL template0 as postgres with no password?" \
+    "Can we connect to PostgreSQL template0 as postgres and no pass?" \
     'psql -U postgres template0 -c "select version()" | grep version'
   lse_test "sof020" "0" \
-    "Can we connect to PostgreSQL template1 as postgres with no password?" \
+    "Can we connect to PostgreSQL template1 as postgres and no pass?" \
     'psql -U postgres template1 -c "select version()" | grep version'
   lse_test "sof020" "0" \
-    "Can we connect to PostgreSQL template0 as psql with no password?" \
+    "Can we connect to PostgreSQL template0 as psql and no pass?" \
     'psql -U pgsql template0 -c "select version()" | grep version'
   lse_test "sof020" "0" \
-    "Can we connect to PostgreSQL template1 as psql with no password?" \
+    "Can we connect to PostgreSQL template1 as psql and no pass?" \
     'psql -U pgsql template1 -c "select version()" | grep version'
 
   #installed apache modules
@@ -852,7 +896,7 @@ lse_run_tests_software() {
 
 ###################################################################( containers
 lse_run_tests_containers() {
-  lse_header "containers"
+  lse_header "ctn" "containers"
 
   #check to see if we are in a docker container
   lse_test "ctn000" "1" \
@@ -882,14 +926,13 @@ lse_run_tests_containers() {
 #
 ##)
 
-
 #( Main
 while getopts "hcil:s:" option; do
   case "${option}" in
     c) lse_color=false;;
     i) lse_interactive=false;;
-    l) lse_set_level "$OPTARG";;
-    s) lse_selection="$OPTARG";;
+    l) lse_set_level "${OPTARG}";;
+    s) lse_selection="${OPTARG//,/ }";;
     h) lse_help; exit 0;;
     *) lse_help; exit 1;;
   esac
