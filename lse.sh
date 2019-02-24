@@ -1,4 +1,4 @@
-#!/bin/bash
+#/bin/bash
 # vim: set ts=2 sw=2 sts=2 et:
 
 # Author: Diego Blanco <diego.blanco@treitos.com>
@@ -916,7 +916,7 @@ lse_run_tests_containers() {
   #check to see if we are in an lxc container
   lse_test "ctn200" "1" \
     "Are we in a lxc container?" \
-    'grep -a container=lxc /proc/1/environ'
+    'grep -a container=lxc /proc/1/environ | tr -d "\0"'
 
   #is user a member of any lxd/lxc group
   lse_test "ctn210" "0" \
