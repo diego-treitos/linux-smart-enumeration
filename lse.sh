@@ -497,6 +497,11 @@ lse_run_tests_filesystem() {
     "Can we access other users mail?" \
     'for f in /var/mail/*; do [ "$f" != "/var/mail/$lse_user" ] && [ -r "$f" ] && echo "$f"; done'
 
+  #check for code repositories
+  lse_test "fst150" "1" \
+    "Looking for GIT/SVN repositories" \
+    'find / \( -name ".git" -o -name ".svn" \)'
+
   #files owned by user
   lse_test "fst500" "2" \
     "Files owned by user '$lse_user'" \
