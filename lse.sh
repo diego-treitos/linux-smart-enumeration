@@ -301,6 +301,12 @@ lse_header() {
   text+="(${green} $title ${magenta})====="
   cecho "$text${reset}"
 }
+lse_exit() {
+  local ec=1
+  [ "$1" ] && ec=$1
+  echo -e "$reset"
+  exit $ec
+}
 #)
 
 ########################################################################( TESTS
@@ -937,6 +943,9 @@ while getopts "hcil:s:" option; do
     *) lse_help; exit 1;;
   esac
 done
+
+#trap to exec on SIGINT
+trap "lse_exit 1" SIGINT
 
 lse_request_information
 lse_show_info
