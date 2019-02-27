@@ -147,6 +147,7 @@ lse_common_setuid=(
   '/usr/libexec/pt_chown'
   '/usr/libexec/qemu-bridge-helper'
   '/usr/libexec/spice-gtk-x86_64/spice-client-glib-usb-acl-helper'
+  '/usr/sbin/exim4'
   '/usr/sbin/grub2-set-bootflag'
   '/usr/sbin/mount.nfs'
   '/usr/sbin/mtr-packet'
