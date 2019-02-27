@@ -80,6 +80,90 @@ lse_hostname="`hostname`"
 lse_passed_tests=""
 lse_executed_tests=""
 lse_DEBUG=false
+
+# internal data
+lse_common_setuid=(
+  '/bin/fusermount'
+  '/bin/mount'
+  '/bin/ntfs-3g'
+  '/bin/ping'
+  '/bin/ping6'
+  '/bin/su'
+  '/bin/umount'
+  '/lib64/dbus-1/dbus-daemon-launch-helper'
+  '/sbin/mount.ecryptfs_private'
+  '/sbin/mount.nfs'
+  '/sbin/pam_timestamp_check'
+  '/sbin/pccardctl'
+  '/sbin/unix2_chkpwd'
+  '/sbin/unix_chkpwd'
+  '/usr/bin/Xorg'
+  '/usr/bin/arping'
+  '/usr/bin/at'
+  '/usr/bin/beep'
+  '/usr/bin/chage'
+  '/usr/bin/chfn'
+  '/usr/bin/chsh'
+  '/usr/bin/crontab'
+  '/usr/bin/expiry'
+  '/usr/bin/firejail'
+  '/usr/bin/fusermount'
+  '/usr/bin/fusermount-glusterfs'
+  '/usr/bin/gpasswd'
+  '/usr/bin/kismet_capture'
+  '/usr/bin/mount'
+  '/usr/bin/mtr'
+  '/usr/bin/newgidmap'
+  '/usr/bin/newgrp'
+  '/usr/bin/newuidmap'
+  '/usr/bin/passwd'
+  '/usr/bin/pkexec'
+  '/usr/bin/procmail'
+  '/usr/bin/staprun'
+  '/usr/bin/su'
+  '/usr/bin/sudo'
+  '/usr/bin/sudoedit'
+  '/usr/bin/traceroute6.iputils'
+  '/usr/bin/umount'
+  '/usr/bin/weston-launch'
+  '/usr/lib/chromium-browser/chrome-sandbox'
+  '/usr/lib/dbus-1.0/dbus-daemon-launch-helper'
+  '/usr/lib/dbus-1/dbus-daemon-launch-helper'
+  '/usr/lib/eject/dmcrypt-get-device'
+  '/usr/lib/openssh/ssh-keysign'
+  '/usr/lib/policykit-1/polkit-agent-helper-1'
+  '/usr/lib/polkit-1/polkit-agent-helper-1'
+  '/usr/lib/pt_chown'
+  '/usr/lib/snapd/snap-confine'
+  '/usr/lib/spice-gtk/spice-client-glib-usb-acl-helper'
+  '/usr/lib/x86_64-linux-gnu/lxc/lxc-user-nic'
+  '/usr/lib/xorg/Xorg.wrap'
+  '/usr/libexec/Xorg.wrap'
+  '/usr/libexec/abrt-action-install-debuginfo-to-abrt-cache'
+  '/usr/libexec/dbus-1/dbus-daemon-launch-helper'
+  '/usr/libexec/gstreamer-1.0/gst-ptp-helper'
+  '/usr/libexec/openssh/ssh-keysign'
+  '/usr/libexec/polkit-1/polkit-agent-helper-1'
+  '/usr/libexec/pt_chown'
+  '/usr/libexec/qemu-bridge-helper'
+  '/usr/libexec/spice-gtk-x86_64/spice-client-glib-usb-acl-helper'
+  '/usr/sbin/grub2-set-bootflag'
+  '/usr/sbin/mount.nfs'
+  '/usr/sbin/mtr-packet'
+  '/usr/sbin/pam_timestamp_check'
+  '/usr/sbin/pppd'
+  '/usr/sbin/pppoe-wrapper'
+  '/usr/sbin/suexec'
+  '/usr/sbin/unix_chkpwd'
+  '/usr/sbin/userhelper'
+  '/usr/sbin/usernetctl'
+  '/usr/sbin/uuidd'
+)
+#regex rules for common setuid
+lse_common_setuid+=(
+  '/snap/core/.*'
+  '/var/tmp/mkinitramfs.*'
+)
 #)
 
 #( Options
@@ -430,7 +514,7 @@ lse_run_tests_filesystem() {
   #uncommon setuid binaries
   lse_test "fst020" "0" \
     "Uncommon setuid binaries" \
-    'echo -e "$lse_setuid_binaries" | grep -Ev "^/(bin|sbin|usr/bin|usr/lib|usr/sbin)"' \
+    'local setuidbin="$lse_setuid_binaries"; for cs in "${lse_common_setuid[@]}"; do setuidbin=`echo -e "$setuidbin" | grep -Ev "$cs"`;done ; echo -e "$setuidbin"' \
     "fst010"
 
   #can we write to any setuid binary
