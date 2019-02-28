@@ -918,6 +918,10 @@ lse_run_tests_processes() {
     "Can we write in any process binary?" \
     'for b in $lse_proc_bin; do [ -w "$b" ] && echo $b; done'
 
+  lse_test "pro010" "1" \
+    "Processes running with root permissions" \
+    'ps -u root -U root -f | grep -Ev "\[[[:alnum:]]"'
+
   #running processes
   lse_test "pro500" "2" \
     "Running processes" \
