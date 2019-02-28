@@ -75,6 +75,8 @@ lse_home="$HOME"
 lse_arch="`uname -m`"
 lse_linux="`uname -r`"
 lse_hostname="`hostname`"
+lse_distro=`which lsb_release >/dev/null && lsb_release -d | sed 's/Description:\s*//' 2>/dev/null`
+[ -z "$lse_distro" ] && lse_distro="`(source /etc/os-release && echo "$PRETTY_NAME")2>/dev/null`"
 
 # lse
 lse_passed_tests=""
@@ -359,6 +361,9 @@ lse_show_info() {
   echo
   cecho    "${lblue}    Hostname:${reset} $lse_hostname"
   cecho    "${lblue}       Linux:${reset} $lse_linux"
+	if [ "$lse_distro" ]; then
+  cecho    "${lblue}Distribution:${reset} $lse_distro"
+	fi
   cecho    "${lblue}Architecture:${reset} $lse_arch"
   echo
 }
