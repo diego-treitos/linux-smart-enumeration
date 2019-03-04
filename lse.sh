@@ -503,7 +503,7 @@ lse_run_tests_sudo() {
 lse_run_tests_filesystem() {
   lse_header "fst" "file system"
 
-  #writable files outside user's home
+  #writable files outside user's home. NOTE: Does not check if user can write in symlink destination (performance reasons: -L implies -noleaf)
   lse_test "fst000" "1" \
     "Writable files outside user's home" \
     'find  / \! -type l -writable -not -path "$HOME/*" -not -path "/proc/*" -not -path "/sys/*" -not -path "/dev/*" -not -path "/run/*"; 
