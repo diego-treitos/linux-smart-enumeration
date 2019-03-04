@@ -393,8 +393,10 @@ lse_header() {
 }
 lse_exit() {
   local ec=1
+  local text="\n${magenta}=================================="
   [ "$1" ] && ec=$1
-  echo -e "$reset"
+  text+="(${green} FINISHED ${magenta})=================================="
+  cecho "$text${reset}"
   exit $ec
 }
 #)
@@ -1061,5 +1063,7 @@ lse_run_tests_services
 lse_run_tests_processes
 lse_run_tests_software
 lse_run_tests_containers
+
+lse_exit 0
 #)
 
