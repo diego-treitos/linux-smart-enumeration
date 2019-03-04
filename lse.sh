@@ -728,7 +728,8 @@ lse_run_tests_recurrent_tasks() {
   #cron tasks writable by user
   lse_test "ret010" "0" \
     "Cron tasks writable by user" \
-    'echo -e "$lse_user_writable" | grep -E "^/(etc/anacron|etc/cron|var/spool/cron)"'
+    'echo -e "$lse_user_writable" | grep -E "^/(etc/anacron|etc/cron|var/spool/cron)"' \
+    "fst000"
 
   #list cron jobs
   lse_test "ret020" "1" \
@@ -760,7 +761,8 @@ lse_run_tests_recurrent_tasks() {
   #can we write in any system timer?
   lse_test "ret510" "0" \
     "Can we write in any system timer?" \
-    'echo -e "$lse_user_writable" | grep -E "\.timer$"'
+    'echo -e "$lse_user_writable" | grep -E "\.timer$"' \
+    "fst000"
 
   #system timers
   lse_test "ret900" "2" \
@@ -828,7 +830,8 @@ lse_run_tests_services() {
   #check write permissions in init.d/* inetd.conf xinetd.conf
   lse_test "srv000" "0" \
     "Can we write in service files?" \
-    'echo -e "$lse_user_writable" | grep -E "^/etc/(init/|init\.d/|rc\.d/|rc[0-9S]\.d/|rc\.local|inetd\.conf|xinetd\.conf|xinetd\.d/)"'
+    'echo -e "$lse_user_writable" | grep -E "^/etc/(init/|init\.d/|rc\.d/|rc[0-9S]\.d/|rc\.local|inetd\.conf|xinetd\.conf|xinetd\.d/)"' \
+    "fst000"
 
   #check write permissions for binaries involved in services
   lse_test "srv010" "0" \
@@ -894,7 +897,8 @@ lse_run_tests_services() {
   #check write permissions in systemd services
   lse_test "srv500" "0" \
     "Can we write in systemd service files?" \
-    'echo -e "$lse_user_writable" | grep -E "^/(etc/systemd/|lib/systemd/).+\.service$"'
+    'echo -e "$lse_user_writable" | grep -E "^/(etc/systemd/|lib/systemd/).+\.service$"' \
+    "fst000"
 
   #check write permissions for binaries involved in systemd services
   lse_test "srv510" "0" \
