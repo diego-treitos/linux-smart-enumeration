@@ -728,8 +728,7 @@ lse_run_tests_recurrent_tasks() {
   #cron tasks writable by user
   lse_test "ret010" "0" \
     "Cron tasks writable by user" \
-    'echo -e "$lse_user_writable" | grep -E "^/(etc/anacron|etc/cron|var/spool/cron)"' \
-    "fst000"
+    'find -L /etc/cron* /etc/anacron /var/spool/cron -writable' \
 
   #list cron jobs
   lse_test "ret020" "1" \
@@ -745,6 +744,18 @@ lse_run_tests_recurrent_tasks() {
   lse_test "ret040" "1" \
     "Can we list other user cron tasks?" \
     'for u in $(cut -d: -f 1 /etc/passwd); do [ "$u" != "$lse_user" ] && crontab -l -u "$u"; done'
+
+  #can we write to executable paths present in cron tasks?
+  lse_test "ret050" "0" \
+    "Can we write to executable paths present in cron jobs" \
+    'for uw in $lse_user_writable; do [ -f "$uw" ] && [ -x "$uw" ] && grep -R "$uw" /etc/crontab /etc/cron.d/ /etc/anacrontab ; done' \
+    "fst000"
+
+  #can we write to any paths present in cron tasks?
+  lse_test "ret060" "1" \
+    "Can we write to any paths present in cron jobs" \
+    'for uw in $lse_user_writable; do grep -R "$uw" /etc/crontab /etc/cron.d/ /etc/anacrontab ; done | sort  | uniq' \
+    "fst000"
 
   #list cron files
   lse_test "ret400" "2" \
