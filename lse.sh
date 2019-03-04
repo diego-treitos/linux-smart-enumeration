@@ -686,7 +686,7 @@ lse_run_tests_security() {
   #get all binaries with capabilities
   lse_test "sec010" "1" \
     "List files with capabilities" \
-    'getcap -r' \
+    'getcap -r /' \
     "" \
     "lse_cap_bin"
 
