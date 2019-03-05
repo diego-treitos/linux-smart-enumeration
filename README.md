@@ -60,6 +60,8 @@ Use: ./lse.sh [options]
 
 ### Usage demo
 
+Also available in [webm video](https://raw.githubusercontent.com/diego-treitos/linux-smart-enumeration/master/screenshots/lse.webm)
+
 ![LSE Demo](https://github.com/diego-treitos/linux-smart-enumeration/raw/master/screenshots/lse.gif)
 
 ### Level 0 (default) output sample
