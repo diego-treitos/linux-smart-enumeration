@@ -56,3 +56,21 @@ Use: ./lse.sh [options]
                   ctn: Container (docker, lxc) related tests.
                 Specific tests can be used with their IDs (i.e.: usr020,sud)
 ```
+## Is it pretty?
+
+### Usage demo
+
+![LSE Demo](https://github.com/diego-treitos/linux-smart-enumeration/raw/master/screenshots/lse.gif)
+
+### Level 0 (default) output sample
+
+![LSE level0](https://raw.githubusercontent.com/diego-treitos/linux-smart-enumeration/master/screenshots/lse_level0.png)
+
+### Level 1 verbosity output sample
+
+![LSE level1](https://raw.githubusercontent.com/diego-treitos/linux-smart-enumeration/master/screenshots/lse_level1.png)
+
+### Level 2 verbosity output sample
+
+![LSE level2](https://raw.githubusercontent.com/diego-treitos/linux-smart-enumeration/master/screenshots/lse_level2.png)
+
