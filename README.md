@@ -1,5 +1,7 @@
 First, a couple of useful oneliners ;)
+
 `wget "https://raw.githubusercontent.com/diego-treitos/linux-smart-enumeration/master/lse.sh" -O lse.sh`
+
 `curl "https://raw.githubusercontent.com/diego-treitos/linux-smart-enumeration/master/lse.sh" -o lse.sh`
 
 # linux-smart-enumeration
