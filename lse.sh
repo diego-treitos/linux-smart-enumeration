@@ -240,11 +240,28 @@ lse_ask() {
       ;;
   esac
 }
+
+# We do not want some inputs to be displayed when tiped
+lse_ask_hidden() {
+  local question="$1"
+  # Use stderr to print the question
+  cecho -n "${white}${question}: ${reset}" >&2
+  read -s answer
+  case answer in
+    y|Y|yes|Yes|ok|Ok|true|True)
+      return 0
+      ;;
+    *)
+      return 1
+      ;;
+  esac
+}
+
 lse_request_information() {
   if $lse_interactive; then
   cecho "${grey}---"
     [ -z "$lse_user" ] && lse_user=`lse_ask "Could not find current user name. Current user?"`
-    lse_pass=`lse_ask "If you know the current user password, write it here for better results"`
+    lse_pass=`lse_ask_hidden "If you know the current user password, write it here for better results"`
   cecho "${grey}---"
   fi
 }
