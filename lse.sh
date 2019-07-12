@@ -178,11 +178,14 @@ lse_selection="" #Selected tests to run. Empty means all.
 
 #( Lib
 cecho() {
+  nl="\n"
+  [ "$1" == "-n" ] && nl="" && shift
+
   if $lse_color; then
-    echo -e "$@"
+    printf "$@$nl"
   else
     # If color is disabled we remove it
-    echo -e "$@" | sed 's/\x1B\[[0-9;]\+[A-Za-z]//g'
+    printf "$@$nl" | sed 's/\x1B\[[0-9;]\+[A-Za-z]//g'
   fi
 }
 lse_error() {
