@@ -178,18 +178,15 @@ lse_selection="" #Selected tests to run. Empty means all.
 
 #( Lib
 cecho() {
-  nl="\n"
-  [ "$1" == "-n" ] && nl="" && shift
-
   if $lse_color; then
-    printf "$@$nl"
+    printf "$@"
   else
     # If color is disabled we remove it
-    printf "$@$nl" | sed 's/\x1B\[[0-9;]\+[A-Za-z]//g'
+    printf "$@" | sed 's/\x1B\[[0-9;]\+[A-Za-z]//g'
   fi
 }
 lse_error() {
-  cecho "${red}ERROR: ${reset}$*" >&2
+  cecho "${red}ERROR: ${reset}$*\n" >&2
 }
 lse_set_level() {
   case "$1" in
@@ -231,7 +228,7 @@ lse_help() {
 lse_ask() {
   local question="$1"
   # We use stderr to print the question
-  cecho -n "${white}${question}: ${reset}" >&2
+  cecho "${white}${question}: ${reset}" >&2
   read answer
   case answer in
     y|Y|yes|Yes|ok|Ok|true|True)
@@ -245,10 +242,10 @@ lse_ask() {
 }
 lse_request_information() {
   if $lse_interactive; then
-  cecho "${grey}---"
+  cecho "${grey}---\n"
     [ -z "$lse_user" ] && lse_user=`lse_ask "Could not find current user name. Current user?"`
     lse_pass=`lse_ask "If you know the current user password, write it here for better results"`
-  cecho "${grey}---"
+  cecho "${grey}---\n"
   fi
 }
 lse_test_passed() {
@@ -291,10 +288,10 @@ lse_test() {
   fi
 
   # DEBUG messages
-  $lse_DEBUG && cecho "${lmagenta}DEBUG: ${lgreen}Executing: ${reset}$cmd"
+  $lse_DEBUG && cecho "${lmagenta}DEBUG: ${lgreen}Executing: ${reset}$cmd\n"
 
   # Print name and line
-  cecho -n "${white}[${l}${white}] ${grey}${id}${white} $name${grey}"
+  cecho "${white}[${l}${white}] ${grey}${id}${white} $name${grey}"
   for i in $(seq $((${#name}+4)) 67); do
     echo -n "."
   done
@@ -305,12 +302,12 @@ lse_test() {
     lse_test_passed "$d" || non_met_deps+="$d"
   done
   if [ "$non_met_deps" ]; then
-    cecho " ${grey}skip"
+    cecho " ${grey}skip\n"
     # In "selection mode" we print the missed dependencies
     if [ "$lse_selection" ]; then
-      cecho "${red}---"
-      cecho "Dependencies not met:$reset $non_met_deps"
-      cecho "${red}---$reset"
+      cecho "${red}---\n"
+      cecho "Dependencies not met:$reset $non_met_deps\n"
+      cecho "${red}---$reset\n"
     fi
     return 1
   fi 
@@ -318,7 +315,7 @@ lse_test() {
   # If level is 2 we do not execute level 2 tests unless their output needs
   # to be assigned to a variable
   if [ $level -ge 2 ] && [ $lse_level -lt 2 ] && [ -z "$var" ]; then
-    cecho " ${grey}skip"
+    cecho " ${grey}skip\n"
     return 1
   else
     if $lse_DEBUG; then
@@ -334,40 +331,40 @@ lse_test() {
   fi
 
   if [ -z "$output" ]; then
-    cecho "${grey} nope${reset}"
+    cecho "${grey} nope${reset}\n"
     return 1
   else
     lse_passed_tests+=" $id"
-    cecho "${r} yes!${reset}"
+    cecho "${r} yes!${reset}\n"
     if [ $lse_level -ge $level ]; then
-      cecho "${grey}---$reset"
+      cecho "${grey}---$reset\n"
       echo "$output"
-      cecho "${grey}---$reset"
+      cecho "${grey}---$reset\n"
     fi
     return 0
   fi
 }
 lse_show_info() {
   echo
-  cecho    "${lblue}        User:${reset} $lse_user"
-  cecho    "${lblue}     User ID:${reset} $lse_user_id"
-  cecho -n "${lblue}    Password:${reset} "
+  cecho "${lblue}        User:${reset} $lse_user\n"
+  cecho "${lblue}     User ID:${reset} $lse_user_id\n"
+  cecho "${lblue}    Password:${reset} "
   if [ -z "$lse_pass" ]; then
-    cecho "${grey}none${reset}"
+    cecho "${grey}none${reset}\n"
   else
-    cecho "******"
+    cecho "******\n"
   fi
-  cecho    "${lblue}        Home:${reset} $lse_home"
-  cecho    "${lblue}        Path:${reset} $PATH"
-  cecho    "${lblue}       umask:${reset} `umask 2>/dev/null`"
+  cecho "${lblue}        Home:${reset} $lse_home\n"
+  cecho "${lblue}        Path:${reset} $PATH\n"
+  cecho "${lblue}       umask:${reset} `umask 2>/dev/null`\n"
 
   echo
-  cecho    "${lblue}    Hostname:${reset} $lse_hostname"
-  cecho    "${lblue}       Linux:${reset} $lse_linux"
+  cecho "${lblue}    Hostname:${reset} $lse_hostname\n"
+  cecho "${lblue}       Linux:${reset} $lse_linux\n"
 	if [ "$lse_distro" ]; then
-  cecho    "${lblue}Distribution:${reset} $lse_distro"
+  cecho "${lblue}Distribution:${reset} $lse_distro\n"
 	fi
-  cecho    "${lblue}Architecture:${reset} $lse_arch"
+  cecho "${lblue}Architecture:${reset} $lse_arch\n"
   echo
 }
 lse_header() {
@@ -392,14 +389,14 @@ lse_header() {
     text+="="
   done
   text+="(${green} $title ${magenta})====="
-  cecho "$text${reset}"
+  cecho "$text${reset}\n"
 }
 lse_exit() {
   local ec=1
   local text="\n${magenta}=================================="
   [ "$1" ] && ec=$1
   text+="(${green} FINISHED ${magenta})=================================="
-  cecho "$text${reset}"
+  cecho "$text${reset}\n"
   exit $ec
 }
 #)
