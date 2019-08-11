@@ -75,7 +75,7 @@ lse_home="$HOME"
 lse_arch="`uname -m`"
 lse_linux="`uname -r`"
 lse_hostname="`hostname`"
-lse_distro=`which lsb_release >/dev/null && lsb_release -d | sed 's/Description:\s*//' 2>/dev/null`
+lse_distro=`command -v lsb_release >/dev/null 2>&1 && lsb_release -d | sed 's/Description:\s*//' 2>/dev/null`
 [ -z "$lse_distro" ] && lse_distro="`(source /etc/os-release && echo "$PRETTY_NAME")2>/dev/null`"
 
 # lse
@@ -1081,4 +1081,3 @@ lse_run_tests_containers
 
 lse_exit 0
 #)
-
