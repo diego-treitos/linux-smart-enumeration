@@ -671,6 +671,11 @@ lse_run_tests_system() {
   lse_test "sys080" "2" \
     "System password policies in /etc/login.defs" \
     'grep "^PASS_MAX_DAYS\|^PASS_MIN_DAYS\|^PASS_WARN_AGE\|^ENCRYPT_METHOD" /etc/login.defs'
+    
+  #check if we can write to /etc/passwd
+  lse_test "sys090" "0" \
+    "Can we write to /etc/passwd?" \
+    '[ -w /etc/passwd ] && echo "yes"'
 }
 
 
