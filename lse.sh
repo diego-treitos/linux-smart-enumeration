@@ -167,6 +167,26 @@ lse_common_setuid+=(
   '/snap/core/.*'
   '/var/tmp/mkinitramfs.*'
 )
+#critical writable files
+lse_critical_writable=(
+  '/etc/apache2/apache2.conf'
+  '/etc/apache2/httpd.conf'
+  '/etc/hosts.allow'
+  '/etc/hosts.deny'
+  '/etc/httpd/conf/httpd.conf'
+  '/etc/httpd/httpd.conf'
+  '/etc/incron.conf'
+  '/etc/incron.d/*'
+  '/etc/passwd'
+  '/etc/php*/fpm/pool.d/*'
+  '/etc/php/*/fpm/pool.d/*'
+  '/etc/shadow'
+  '/etc/sudoers'
+  '/etc/supervisor/conf.d/*'
+  '/etc/supervisor/supervisord.conf'
+  '/etc/uwsgi/apps-enabled/*'
+  '/root/.ssh/authorized_keys'
+)
 #)
 
 #( Options
@@ -593,6 +613,12 @@ lse_run_tests_filesystem() {
   lse_test "fst150" "1" \
     "Looking for GIT/SVN repositories" \
     'find / \( -name ".git" -o -name ".svn" \)'
+
+  #can we write to files that can give us root
+  lse_test "fst160" "0" \
+    "Can we write to critical files?" \
+    'for uw in $lse_user_writable; do [ -f "$uw" ] && for cw in "${lse_critical_writable[@]}"; do ls $cw 2>/dev/null | egrep "^$uw$"; done ; done' \
+    "fst000"
 
   #files owned by user
   lse_test "fst500" "2" \
