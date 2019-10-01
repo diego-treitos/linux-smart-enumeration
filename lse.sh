@@ -673,28 +673,33 @@ lse_run_tests_system() {
       'cat /etc/$s'
   done
 
+  # Check if we can write into /etc/passwd file
+  lse_test "sys040" "0" \
+    "Can we write into /etc/passwd file?" \
+    'find /etc/passwd -user $USER -perm -u=w -exec ls -la {} \;'
+
   #check for superuser accounts
-  lse_test "sys040" "1" \
+  lse_test "sys050" "1" \
     "Check for other superuser accounts" \
     'for u in $(cut -d: -f1 /etc/passwd); do [ $(id -u $u) == 0 ] && echo $u; done | grep -v root'
 
   #can root log in via SSH
-  lse_test "sys050" "1" \
+  lse_test "sys060" "1" \
     "Can root user log in via SSH?" \
     'grep -E "^[[:space:]]*PermitRootLogin " /etc/ssh/sshd_config | grep -E "(yes|without-password)"'
     
   #list available shells
-  lse_test "sys060" "2" \
+  lse_test "sys070" "2" \
     "List available shells" \
     'cat /etc/shells'
 
   #system umask
-  lse_test "sys070" "2" \
+  lse_test "sys080" "2" \
     "System umask in /etc/login.defs" \
     'grep "^UMASK" /etc/login.defs'
 
   #system password policies
-  lse_test "sys080" "2" \
+  lse_test "sys090" "2" \
     "System password policies in /etc/login.defs" \
     'grep "^PASS_MAX_DAYS\|^PASS_MIN_DAYS\|^PASS_WARN_AGE\|^ENCRYPT_METHOD" /etc/login.defs'
 }
