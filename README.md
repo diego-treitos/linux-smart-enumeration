@@ -1,8 +1,8 @@
 First, a couple of useful oneliners ;)
 
-`wget "https://raw.githubusercontent.com/diego-treitos/linux-smart-enumeration/master/lse.sh" -O lse.sh`
+`wget "https://raw.githubusercontent.com/diego-treitos/linux-smart-enumeration/master/lse.sh" -O lse.sh;chmod 500 lse.sh`
 
-`curl "https://raw.githubusercontent.com/diego-treitos/linux-smart-enumeration/master/lse.sh" -o lse.sh`
+`curl "https://raw.githubusercontent.com/diego-treitos/linux-smart-enumeration/master/lse.sh" -o lse.sh;chmod 500 lse.sh`
 
 # linux-smart-enumeration
 Linux enumeration tools for pentesting and CTFs
