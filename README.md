@@ -82,3 +82,7 @@ Also available in [webm video](https://raw.githubusercontent.com/diego-treitos/l
 
 ![LSE level2](https://raw.githubusercontent.com/diego-treitos/linux-smart-enumeration/master/screenshots/lse_level2.png)
 
+## Buy me a beer
+Feel free to buy me a beer if this script was useful ;)
+
+BTC: 35vuLqfqAHrXssiGzSzPF8d9MJDyQQYBBb
