@@ -1,3 +1,5 @@
+
+
 First, a couple of useful oneliners ;)
 
 `wget "https://github.com/diego-treitos/linux-smart-enumeration/raw/master/lse.sh" -O lse.sh;chmod 700 lse.sh`
@@ -85,4 +87,4 @@ Also available in [webm video](https://raw.githubusercontent.com/diego-treitos/l
 ## Buy me a beer
 Feel free to buy me a beer if this script was useful `;)`
 
-**BTC**: `35vuLqfqAHrXssiGzSzPF8d9MJDyQQYBBb`
+**₿**: `1DNBZRAzP6WVnTeBPoYvnDtjxnS1S8Gnxk`
