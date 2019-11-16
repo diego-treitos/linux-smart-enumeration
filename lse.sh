@@ -4,7 +4,7 @@
 # Author: Diego Blanco <diego.blanco@treitos.com>
 # GitHub: https://github.com/diego-treitos/linux-smart-enumeration
 # 
-lse_version="1.8"
+lse_version="1.9"
 
 #( Colors
 #
@@ -526,9 +526,9 @@ lse_run_tests_filesystem() {
   #writable files outside user's home. NOTE: Does not check if user can write in symlink destination (performance reasons: -L implies -noleaf)
   lse_test "fst000" "1" \
     "Writable files outside user's home" \
-    'find  / \! -type l -writable -not -path "$HOME/*" -not -path "/proc/*" -not -path "/sys/*" -not -path "/dev/*" -not -path "/run/*"; 
+    'find  / \! -type l -writable -not -path "$lse_home/*" -not -path "/proc/*" -not -path "/sys/*" -not -path "/dev/*" -not -path "/run/*";
     # Add symlinks owned by the user (so the user can change where they point)
-    find  / -type l -user $lse_user -not -path "$HOME/*" -not -path "/proc/*" -not -path "/sys/*" -not -path "/dev/*" -not -path "/run/*"' \
+    find  / -type l -user $lse_user -not -path "$lse_home/*" -not -path "/proc/*" -not -path "/sys/*" -not -path "/dev/*" -not -path "/run/*"' \
     "" \
     "lse_user_writable"
 
