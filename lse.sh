@@ -1069,7 +1069,7 @@ lse_run_tests_containers() {
   #is user a member of any lxd/lxc group
   lse_test "ctn210" "0" \
     "Is the user a member of any lxc/lxd group?" \
-    'groups | grep  "lxc|lxd"'
+    'groups | grep "lxc\|lxd"'
 }
 #
 ##)
