@@ -4,7 +4,7 @@
 # Author: Diego Blanco <diego.blanco@treitos.com>
 # GitHub: https://github.com/diego-treitos/linux-smart-enumeration
 # 
-lse_version="1.10"
+lse_version="1.11"
 
 #( Colors
 #
