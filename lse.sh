@@ -582,7 +582,7 @@ lse_run_tests_filesystem() {
   #check for SSH files in home directories
   lse_test "fst090" "1" \
     "SSH files in home directories" \
-    'for h in $(cut -d: -f6 /etc/passwd); do find "$h" \( -name "*id_dsa*" -o -name "*id_rsa*" -o -name "known_hosts" -o -name "authorized_hosts" -o -name "authorized_keys" \) -exec ls -la {} \; ; done'
+    'for h in $(cut -d: -f6 /etc/passwd | sort | uniq | grep -Ev "^(/|/dev|/bin|/proc|/run/.*|/var/run/.*)$"); do find "$h" \( -name "*id_dsa*" -o -name "*id_rsa*" -o -name "*id_ecdsa*" -o -name "*id_ed25519*" -o -name "known_hosts" -o -name "authorized_hosts" -o -name "authorized_keys" \) -exec ls -la {} \; ; done'
 
   #check useful binaries
   lse_test "fst100" "1" \
