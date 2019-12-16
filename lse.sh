@@ -194,6 +194,7 @@ lse_color=true
 lse_interactive=true
 lse_level=0 #Valid levels 0:default, 1:interesting, 2:all
 lse_selection="" #Selected tests to run. Empty means all.
+lse_find_opts='-path /proc -prune -o -path /sys -prune -o -path /dev -prune -o -path /run -prune -o' #paths to exclude from searches
 #)
 
 #( Lib
@@ -207,6 +208,15 @@ cecho() {
 }
 lse_error() {
   cecho "${red}ERROR: ${reset}$*\n" >&2
+}
+lse_exclude_paths() {
+  local IFS=$'\r\n'
+  local GLOBIGNORE='*'
+  for p in `echo $1 | tr ',' '\n'`; do
+    [ "${p:0:1}" == "/" ] || lse_error "'$p' is not an absolute path."
+    [ "${p: -1}" == "/" ] && p="${p%%/}"
+    lse_find_opts+=" -path ${p} -prune -o"
+  done
 }
 lse_set_level() {
   case "$1" in
@@ -223,27 +233,29 @@ lse_help() {
   echo "Use: $0 [options]" 
   echo
   echo " OPTIONS"
-  echo "   -c           Disable color"
-  echo "   -i           Non interactive mode"
-  echo "   -h           This help"
-  echo "   -l LEVEL     Output verbosity level"
-  echo "                  0: Show highly important results. (default)"
-  echo "                  1: Show interesting results."
-  echo "                  2: Show all gathered information."
-  echo "   -s SELECTION Comma separated list of sections or tests to run. Available"
-  echo "                sections:"
-  echo "                  usr: User related tests."
-  echo "                  sud: Sudo related tests."
-  echo "                  fst: File system related tests."
-  echo "                  sys: System related tests."
-  echo "                  sec: Security measures related tests."
-  echo "                  ret: Recurren tasks (cron, timers) related tests."
-  echo "                  net: Network related tests."
-  echo "                  srv: Services related tests."
-  echo "                  pro: Processes related tests."
-  echo "                  sof: Software related tests."
-  echo "                  ctn: Container (docker, lxc) related tests."
-  echo "                Specific tests can be used with their IDs (i.e.: usr020,sud)"
+  echo "  -c           Disable color"
+  echo "  -i           Non interactive mode"
+  echo "  -h           This help"
+  echo "  -l LEVEL     Output verbosity level"
+  echo "                 0: Show highly important results. (default)"
+  echo "                 1: Show interesting results."
+  echo "                 2: Show all gathered information."
+  echo "  -s SELECTION Comma separated list of sections or tests to run. Available"
+  echo "               sections:"
+  echo "                 usr: User related tests."
+  echo "                 sud: Sudo related tests."
+  echo "                 fst: File system related tests."
+  echo "                 sys: System related tests."
+  echo "                 sec: Security measures related tests."
+  echo "                 ret: Recurren tasks (cron, timers) related tests."
+  echo "                 net: Network related tests."
+  echo "                 srv: Services related tests."
+  echo "                 pro: Processes related tests."
+  echo "                 sof: Software related tests."
+  echo "                 ctn: Container (docker, lxc) related tests."
+  echo "               Specific tests can be used with their IDs (i.e.: usr020,sud)"
+  echo "  -e PATHS     Comma separated list of paths to exclude. This allows you"
+  echo "               to do faster scans at the cost of completeness"
 }
 lse_ask() {
   local question="$1"
@@ -339,13 +351,13 @@ lse_test() {
     return 1
   else
     if $lse_DEBUG; then
-      output="`eval "$cmd" 2>&1`"
+      output="`eval $cmd 2>&1`"
     else
       # Execute comand
-      output="`eval "$cmd" 2>/dev/null`"
+      output="`eval $cmd 2>/dev/null`"
     # Assign variable if available
     fi
-    [ "$var" ] && eval "$var='$output'"
+    [ "$var" ] && export "${var}"="$output"
     # Mark test as executed
     lse_executed_tests+=" $id"
   fi
@@ -526,16 +538,16 @@ lse_run_tests_filesystem() {
   #writable files outside user's home. NOTE: Does not check if user can write in symlink destination (performance reasons: -L implies -noleaf)
   lse_test "fst000" "1" \
     "Writable files outside user's home" \
-    'find  / \! -type l -writable -not -path "$lse_home/*" -not -path "/proc/*" -not -path "/sys/*" -not -path "/dev/*" -not -path "/run/*";
+    'find / -path "$lse_home" -prune -o $lse_find_opts -not -type l -writable -print;
     # Add symlinks owned by the user (so the user can change where they point)
-    find  / -type l -user $lse_user -not -path "$lse_home/*" -not -path "/proc/*" -not -path "/sys/*" -not -path "/dev/*" -not -path "/run/*"' \
+    find  / -path "$lse_home" -prune -o $lse_find_opts -type l -user $lse_user -print' \
     "" \
     "lse_user_writable"
 
   #get setuid binaries
   lse_test "fst010" "1" \
     "Binaries with setuid bit" \
-    'find / -perm -4000 -type f' \
+    'find / $lse_find_opts -perm -4000 -type f -print' \
     "" \
     "lse_setuid_binaries"
 
@@ -554,7 +566,7 @@ lse_run_tests_filesystem() {
   #get setgid binaries
   lse_test "fst040" "1" \
     "Binaries with setgid bit" \
-    'find / -perm -2000 -type f' \
+    'find / $lse_find_opts -perm -2000 -type f -print' \
     "lse_setgid_binaries"
 
   #uncommon setgid binaries
@@ -612,7 +624,7 @@ lse_run_tests_filesystem() {
   #check for code repositories
   lse_test "fst150" "1" \
     "Looking for GIT/SVN repositories" \
-    'find / \( -name ".git" -o -name ".svn" \)'
+    'find / $lse_find_opts \( -name ".git" -o -name ".svn" \) -print'
 
   #can we write to files that can give us root
   lse_test "fst160" "0" \
@@ -623,12 +635,12 @@ lse_run_tests_filesystem() {
   #files owned by user
   lse_test "fst500" "2" \
     "Files owned by user '$lse_user'" \
-    'find / -user $lse_user -type f ! -path "/proc/*" ! -path "/sys/*" -exec ls -al {} \;'
+    'find / $lse_find_opts -user $lse_user -type f -exec ls -al {} \;'
 
   #check for SSH files anywhere
   lse_test "fst510" "2" \
     "SSH files anywhere" \
-    'find / \( -name "*id_dsa*" -o -name "*id_rsa*" -o -name "known_hosts" -o -name "authorized_hosts" -o -name "authorized_keys" \) -exec ls -la {} \;'
+    'find / $lse_find_opts \( -name "*id_dsa*" -o -name "*id_rsa*" -o -name "known_hosts" -o -name "authorized_hosts" -o -name "authorized_keys" \) -exec ls -la {} \;'
 
   #dump hosts.equiv file
   lse_test "fst520" "2" \
@@ -1018,7 +1030,7 @@ lse_run_tests_software() {
   #find htpassword files
   lse_test "sof040" "0" \
     "Found any .htpasswd files?" \
-    'find / -name "*.htpasswd" -print -exec cat {} \;'
+    'find / $lse_find_opts -name "*.htpasswd" -print -exec cat {} \;'
 
   #sudo version - check to see if there are any known vulnerabilities with this
   lse_test "sof500" "2" \
@@ -1049,7 +1061,7 @@ lse_run_tests_containers() {
   #check to see if we are in a docker container
   lse_test "ctn000" "1" \
     "Are we in a docker container?" \
-    'grep -i docker /proc/self/cgroup; find / -name "*dockerenv*" -exec ls -la {} \;'
+    'grep -i docker /proc/self/cgroup; find / $lse_find_opts -name "*dockerenv*" -exec ls -la {} \;'
 
   #check to see if current host is running docker services
   lse_test "ctn010" "1" \
@@ -1075,9 +1087,10 @@ lse_run_tests_containers() {
 ##)
 
 #( Main
-while getopts "hcil:s:" option; do
+while getopts "hcil:e:s:" option; do
   case "${option}" in
     c) lse_color=false;;
+    e) lse_exclude_paths "${OPTARG}";;
     i) lse_interactive=false;;
     l) lse_set_level "${OPTARG}";;
     s) lse_selection="${OPTARG//,/ }";;
