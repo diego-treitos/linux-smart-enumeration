@@ -345,7 +345,7 @@ lse_test() {
       output="`eval "$cmd" 2>/dev/null`"
     # Assign variable if available
     fi
-    [ "$var" ] && eval "$var='$output'"
+    [ "$var" ] && export "${var}"="$output"
     # Mark test as executed
     lse_executed_tests+=" $id"
   fi
