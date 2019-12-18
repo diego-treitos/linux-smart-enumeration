@@ -366,6 +366,8 @@ lse_test() {
 }
 lse_show_info() {
   echo
+  cecho "${lcyan} LSE Version:${reset} $lse_version\n"
+  echo
   cecho "${lblue}        User:${reset} $lse_user\n"
   cecho "${lblue}     User ID:${reset} $lse_user_id\n"
   cecho "${lblue}    Password:${reset} "
