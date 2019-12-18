@@ -42,27 +42,29 @@ You can also select what tests to execute by passing the `-s` parameter. With it
 Use: ./lse.sh [options]
 
  OPTIONS
-   -c           Disable color
-   -i           Non interactive mode
-   -h           This help
-   -l LEVEL     Output verbosity level
-                  0: Show highly important results. (default)
-                  1: Show interesting results.
-                  2: Show all gathered information.
-   -s SELECTION Comma separated list of sections or tests to run. Available
-                sections:
-                  usr: User related tests.
-                  sud: Sudo related tests.
-                  fst: File system related tests.
-                  sys: System related tests.
-                  sec: Security measures related tests.
-                  ret: Recurren tasks (cron, timers) related tests.
-                  net: Network related tests.
-                  srv: Services related tests.
-                  pro: Processes related tests.
-                  sof: Software related tests.
-                  ctn: Container (docker, lxc) related tests.
-                Specific tests can be used with their IDs (i.e.: usr020,sud)
+  -c           Disable color
+  -i           Non interactive mode
+  -h           This help
+  -l LEVEL     Output verbosity level
+                 0: Show highly important results. (default)
+                 1: Show interesting results.
+                 2: Show all gathered information.
+  -s SELECTION Comma separated list of sections or tests to run. Available
+               sections:
+                 usr: User related tests.
+                 sud: Sudo related tests.
+                 fst: File system related tests.
+                 sys: System related tests.
+                 sec: Security measures related tests.
+                 ret: Recurren tasks (cron, timers) related tests.
+                 net: Network related tests.
+                 srv: Services related tests.
+                 pro: Processes related tests.
+                 sof: Software related tests.
+                 ctn: Container (docker, lxc) related tests.
+               Specific tests can be used with their IDs (i.e.: usr020,sud)
+  -e PATHS     Comma separated list of paths to exclude. This allows you
+               to do faster scans at the cost of completeness
 ```
 ## Is it pretty?
 
