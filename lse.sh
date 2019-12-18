@@ -773,17 +773,18 @@ lse_run_tests_recurrent_tasks() {
     "Can we list other user cron tasks?" \
     'for u in $(cut -d: -f 1 /etc/passwd); do [ "$u" != "$lse_user" ] && crontab -l -u "$u"; done'
 
-  #can we write to executable paths present in cron tasks?
-  lse_test "ret050" "0" \
-    "Can we write to executable paths present in cron jobs" \
-    'for uw in $lse_user_writable; do [ -f "$uw" ] && [ -x "$uw" ] && grep -R "$uw" /etc/crontab /etc/cron.d/ /etc/anacrontab ; done' \
-    "fst000"
-
   #can we write to any paths present in cron tasks?
-  lse_test "ret060" "1" \
+  lse_test "ret050" "1" \
     "Can we write to any paths present in cron jobs" \
-    'for uw in $lse_user_writable; do grep -R "$uw" /etc/crontab /etc/cron.d/ /etc/anacrontab ; done | sort  | uniq' \
-    "fst000"
+    'for p in `grep --color=never -hERoi "/[a-z0-9_/\.\-]+" /etc/cron* | sort | uniq`; do [ -w "$p" ] && echo "$p"; done' \
+    "" \
+    "lse_user_writable_cron_paths"
+
+  #can we write to executable paths present in cron tasks?
+  lse_test "ret060" "0" \
+    "Can we write to executable paths present in cron jobs" \
+    'for uwcp in $lse_user_writable_cron_paths; do [ -w "$uwcp" ] && [ -x "$uwcp" ] && grep -R "$uwcp" /etc/crontab /etc/cron.d/ /etc/anacrontab ; done' \
+    "ret050"
 
   #list cron files
   lse_test "ret400" "2" \
