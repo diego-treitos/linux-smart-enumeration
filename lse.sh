@@ -619,7 +619,7 @@ lse_run_tests_filesystem() {
   #can we write to files that can give us root
   lse_test "fst160" "0" \
     "Can we write to critical files?" \
-    'for uw in $lse_user_writable; do [ -f "$uw" ] && for cw in "${lse_critical_writable[@]}"; do ls $cw 2>/dev/null | egrep "^$uw$"; done ; done' \
+    'for uw in $lse_user_writable; do [ -f "$uw" ] && for cw in "${lse_critical_writable[@]}"; do [ "$cw" == "$uw" ] && [ -w "$cw" ] && ls -l $cw; done ; done' \
     "fst000"
 
   #files owned by user
