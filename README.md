@@ -9,6 +9,7 @@ First, a couple of useful oneliners ;)
 Direct execution example oneliners:
 
 `bash <(wget -q -O - https://raw.githubusercontent.com/diego-treitos/linux-smart-enumeration/master/lse.sh) -l2 -i`
+
 `bash <(curl -s https://raw.githubusercontent.com/diego-treitos/linux-smart-enumeration/master/lse.sh) -l1 -i`
 
 # linux-smart-enumeration
