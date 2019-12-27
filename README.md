@@ -6,6 +6,11 @@ First, a couple of useful oneliners ;)
 
 `curl "https://github.com/diego-treitos/linux-smart-enumeration/raw/master/lse.sh" -Lo lse.sh;chmod 700 lse.sh`
 
+Direct execution example oneliners:
+
+`bash <(wget -q -O - https://raw.githubusercontent.com/diego-treitos/linux-smart-enumeration/master/lse.sh) -l2 -i`
+`bash <(curl -s https://raw.githubusercontent.com/diego-treitos/linux-smart-enumeration/master/lse.sh) -l1 -i`
+
 # linux-smart-enumeration
 Linux enumeration tools for pentesting and CTFs
 
