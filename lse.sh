@@ -171,21 +171,54 @@ lse_common_setuid+=(
 lse_critical_writable=(
   '/etc/apache2/apache2.conf'
   '/etc/apache2/httpd.conf'
+  '/etc/bash.bashrc'
+  '/etc/bash_completion'
+  '/etc/bash_completion.d/*'
+  '/etc/environment'
+  '/etc/environment.d/*'
   '/etc/hosts.allow'
   '/etc/hosts.deny'
   '/etc/httpd/conf/httpd.conf'
   '/etc/httpd/httpd.conf'
   '/etc/incron.conf'
   '/etc/incron.d/*'
+  '/etc/logrotate.d/*'
+  '/etc/modprobe.d/*'
+  '/etc/pam.d/*'
   '/etc/passwd'
   '/etc/php*/fpm/pool.d/*'
   '/etc/php/*/fpm/pool.d/*'
+  '/etc/profile'
+  '/etc/profile.d/*'
+  '/etc/rc*.d/*'
+  '/etc/rsyslog.d/*'
   '/etc/shadow'
+  '/etc/skel/*'
   '/etc/sudoers'
+  '/etc/sudoers.d/*'
   '/etc/supervisor/conf.d/*'
   '/etc/supervisor/supervisord.conf'
+  '/etc/sysctl.conf'
+  '/etc/sysctl.d/*'
   '/etc/uwsgi/apps-enabled/*'
   '/root/.ssh/authorized_keys'
+)
+#critical writable directories
+lse_critical_writable_dirs=(
+  '/etc/bash_completion.d'
+  '/etc/cron.d'
+  '/etc/cron.daily'
+  '/etc/cron.hourly'
+  '/etc/cron.weekly'
+  '/etc/environment.d'
+  '/etc/logrotate.d'
+  '/etc/modprobe.d'
+  '/etc/pam.d'
+  '/etc/profile.d'
+  '/etc/rsyslog.d/'
+  '/etc/sudoers.d/'
+  '/etc/sysctl.d'
+  '/root'
 )
 #)
 
@@ -632,6 +665,12 @@ lse_run_tests_filesystem() {
   lse_test "fst160" "0" \
     "Can we write to critical files?" \
     'for uw in $lse_user_writable; do [ -f "$uw" ] && for cw in "${lse_critical_writable[@]}"; do [ "$cw" == "$uw" ] && [ -w "$cw" ] && ls -l $cw; done ; done' \
+    "fst000"
+
+  #can we write to directories that can give us root
+  lse_test "fst170" "0" \
+    "Can we write to critical directories?" \
+    'for uw in $lse_user_writable; do [ -d "$uw" ] && for cw in "${lse_critical_writable_dirs[@]}"; do [ "$cw" == "$uw" ] && [ -w "$cw" ] && ls -ld $cw; done ; done' \
     "fst000"
 
   #files owned by user
