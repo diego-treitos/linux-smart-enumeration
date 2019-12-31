@@ -513,6 +513,19 @@ lse_run_tests_users() {
   lse_test "usr060" "2" \
     "Other users" \
     'cat /etc/passwd'
+
+  #find defined PATHs
+  lse_test "usr070" "1" \
+    "PATH variables defined inside /etc" \
+    'for p in `grep -ERh "^ *PATH=.*" /etc/ 2> /dev/null | tr -d \"\'"'"' | cut -d= -f2 | tr ":" "\n" | sort | uniq`; do [ -d "$p" ] && echo "$p";done' \
+    "" \
+    "lse_exec_paths"
+
+  #check if . is in PATHs
+  lse_test "usr080" "0" \
+    "Is '.' in a PATH variable defined inside /etc?" \
+    'for ep in $lse_exec_paths; do [ "$ep" == "." ] && grep -ER "^ *PATH=.*" /etc/ 2> /dev/null | tr -d \"\'"'"' | grep -E "[=:]\.([:[:space:]]|\$)";done' \
+    "usr070"
 }
 
 
@@ -672,6 +685,12 @@ lse_run_tests_filesystem() {
     "Can we write to critical directories?" \
     'for uw in $lse_user_writable; do [ -d "$uw" ] && for cw in "${lse_critical_writable_dirs[@]}"; do [ "$cw" == "$uw" ] && [ -w "$cw" ] && ls -ld $cw; done ; done' \
     "fst000"
+
+  #can we write to directories inside PATHS
+  lse_test "fst180" "0" \
+    "Can we write to directories from PATH defined in /etc?" \
+    'for ep in $lse_exec_paths; do [ -d "$ep" ] && [ -w "$ep" ] && ls -ld "$ep"; done' \
+    "usr070"
 
   #files owned by user
   lse_test "fst500" "2" \
