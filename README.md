@@ -86,6 +86,15 @@ Also available in [webm video](https://raw.githubusercontent.com/diego-treitos/l
 
 ![LSE level2](https://raw.githubusercontent.com/diego-treitos/linux-smart-enumeration/master/screenshots/lse_level2.png)
 
+## Examples
+
+Direct execution oneliners
+
+`bash <(wget -q -O - https://raw.githubusercontent.com/diego-treitos/linux-smart-enumeration/master/lse.sh) -l2 -i`
+
+`bash <(curl -s https://raw.githubusercontent.com/diego-treitos/linux-smart-enumeration/master/lse.sh) -l1 -i`
+ 
+
 ## Buy me a beer
 Feel free to buy me a beer if this script was useful `;)`
 
