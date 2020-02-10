@@ -280,7 +280,7 @@ lse_help() {
   echo "                 fst: File system related tests."
   echo "                 sys: System related tests."
   echo "                 sec: Security measures related tests."
-  echo "                 ret: Recurren tasks (cron, timers) related tests."
+  echo "                 ret: Recurrent tasks (cron, timers) related tests."
   echo "                 net: Network related tests."
   echo "                 srv: Services related tests."
   echo "                 pro: Processes related tests."
@@ -309,7 +309,7 @@ lse_request_information() {
   if $lse_interactive; then
   cecho "${grey}---\n"
     [ -z "$lse_user" ] && lse_user=`lse_ask "Could not find current user name. Current user?"`
-    lse_pass=`lse_ask "If you know the current user password, write it here for better results"`
+    lse_pass=`lse_ask "If you know the current user password, write it here to check sudo privileges"`
   cecho "${grey}---\n"
   fi
 }
@@ -377,8 +377,8 @@ lse_test() {
     return 1
   fi 
 
-  # If level is 2 we do not execute level 2 tests unless their output needs
-  # to be assigned to a variable
+  # If level is 2 and lse_level is less than 2, then we do not execute
+  # level 2 tests unless their output needs to be assigned to a variable
   if [ $level -ge 2 ] && [ $lse_level -lt 2 ] && [ -z "$var" ]; then
     cecho " ${grey}skip\n"
     return 1
@@ -1034,7 +1034,7 @@ lse_run_tests_processes() {
   #lookup process binaries
   lse_proc_bin=`(ps -eo comm | sort | uniq | xargs which)2>/dev/null`
 
-  #check if we have wire permissions in any process binary
+  #check if we have write permissions in any process binary
   lse_test "pro000" "0" \
     "Can we write in any process binary?" \
     'for b in $lse_proc_bin; do [ -w "$b" ] && echo $b; done'
@@ -1127,7 +1127,7 @@ lse_run_tests_containers() {
   #check to see if current host is running docker services
   lse_test "ctn010" "1" \
     "Is docker available?" \
-    'docker --version; docker ps -a'
+    'docker --version; docker ps -a; docker images'
 
   #is user a member of the docker group
   lse_test "ctn020" "0" \
