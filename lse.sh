@@ -497,7 +497,9 @@ lse_run_tests_users() {
   #other users with shell
   lse_test "usr030" "1" \
     "Other users with shell" \
-    'grep -E "sh$" /etc/passwd'
+    'grep -E "sh\$" /etc/passwd'
+    "" \
+    "lse_shell_users"
     
   #user env information
   lse_test "usr040" "2" \
