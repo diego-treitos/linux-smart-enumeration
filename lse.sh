@@ -1046,6 +1046,12 @@ lse_run_tests_processes() {
     "Processes running with root permissions" \
     'ps -u root -f | grep -Ev "\[[[:alnum:]]"'
 
+  #list processes running as users with shell
+  lse_test "pro020" "1" \
+    "Processes running by non-root users with shell" \
+    'for user in `echo -e "$lse_shell_users" | cut -d: -f1 | grep -v root`; do ps -u "$user" | grep -Eq "^ *[0-9]" && echo -e "\n\n------ $user ------\n\n" && ps -u $user -f; done' \
+    "usr030"
+
   #running processes
   lse_test "pro500" "2" \
     "Running processes" \
