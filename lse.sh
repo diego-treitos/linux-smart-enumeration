@@ -740,8 +740,13 @@ lse_run_tests_system() {
     "Does the /etc/passwd have hashes?" \
     'grep -v "^[^:]*:[x]" /etc/passwd'
 
+  #check if /etc/group has group password hashes (old system)
+  lse_test "sys022" "0" \
+    "Does the /etc/group have hashes?" \
+    'grep -v "^[^:]*:[x]" /etc/group'
+
   #check if we can read any shadow file
-  for s in 'shadow' 'shadow-' 'shadow~' 'master.passwd'; do
+  for s in 'shadow' 'shadow-' 'shadow~' 'gshadow' 'gshadow-' 'master.passwd'; do
     lse_test "sys030" "0" \
       "Can we read /etc/$s file?" \
       'cat /etc/$s'
