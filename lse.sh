@@ -694,6 +694,11 @@ lse_run_tests_filesystem() {
     'for ep in $lse_exec_paths; do [ -d "$ep" ] && [ -w "$ep" ] && ls -ld "$ep"; done' \
     "usr070"
 
+  #can we read backups
+  lse_test "fst190" "1" \
+    "Can we read any backup?" \
+    'find / $lse_find_opts -path /usr/lib -prune -o -path /usr/share -prune -o -regextype egrep -iregex ".*(backup|dump|cop(y|ies)|bak|bkp)[^/]*\.(sql|tgz|tar|zip)?\.?(gz|xz|bzip2|bz2|lz|7z)?" -readable -type f -exec ls -al {} \;'
+
   #files owned by user
   lse_test "fst500" "2" \
     "Files owned by user '$lse_user'" \
