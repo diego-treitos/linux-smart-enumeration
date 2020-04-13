@@ -695,7 +695,7 @@ lse_run_tests_filesystem() {
     "usr070"
 
   #can we read backups
-  lse_test "fst190" "1" \
+  lse_test "fst190" "0" \
     "Can we read any backup?" \
     'find / $lse_find_opts -path /usr/lib -prune -o -path /usr/share -prune -o -regextype egrep -iregex ".*(backup|dump|cop(y|ies)|bak|bkp)[^/]*\.(sql|tgz|tar|zip)?\.?(gz|xz|bzip2|bz2|lz|7z)?" -readable -type f -exec ls -al {} \;'
 
