@@ -245,8 +245,8 @@ lse_error() {
 lse_exclude_paths() {
   local IFS="
 "
-  for p in `echo $1 | tr ',' '\n'`; do
-    [ "`printf $p | cut -c1`" = "/" ] || lse_error "'$p' is not an absolute path."
+  for p in `printf "$1" | tr ',' '\n'`; do
+    [ "`printf \"$p\" | cut -c1`" = "/" ] || lse_error "'$p' is not an absolute path."
     p="${p%%/}"
     lse_find_opts="$lse_find_opts -path ${p} -prune -o"
   done
@@ -294,8 +294,8 @@ lse_ask() {
   local question="$1"
   # We use stderr to print the question
   cecho "${white}${question}: ${reset}" >&2
-  read answer
-  case answer in
+  read -r answer
+  case "$answer" in
     y|Y|yes|Yes|ok|Ok|true|True)
       return 0
       ;;
@@ -345,7 +345,7 @@ lse_test() {
   if [ "$lse_selection" ]; then
     local sel_match=false
     for s in $lse_selection; do
-      if [ "$s" = "$id" ] || [ "$s" = "`printf '$id' | cut -c1-3`" ]; then
+      if [ "$s" = "$id" ] || [ "$s" = "`printf \"$id\" | cut -c1-3`" ]; then
         sel_match=true
       fi
     done
@@ -444,7 +444,7 @@ lse_header() {
   if [ "$lse_selection" ]; then
     local sel_match=false
     for s in $lse_selection; do
-      if [ "`printf $s|cut -c1-3`" = "$id" ]; then
+      if [ "`printf \"$s\"|cut -c1-3`" = "$id" ]; then
         sel_match=true
         break
       fi
@@ -464,7 +464,7 @@ lse_exit() {
   [ "$1" ] && ec=$1
   text="$text(${green} FINISHED ${magenta})=================================="
   cecho "$text${reset}\n"
-  exit $ec
+  exit "$ec"
 }
 #)
 
@@ -1176,7 +1176,7 @@ while getopts "hcil:e:s:" option; do
     e) lse_exclude_paths "${OPTARG}";;
     i) lse_interactive=false;;
     l) lse_set_level "${OPTARG}";;
-    s) lse_selection="`printf ${OPTARG}|sed 's/,/ /g'`";;
+    s) lse_selection="`printf \"${OPTARG}\"|sed 's/,/ /g'`";;
     h) lse_help; exit 0;;
     *) lse_help; exit 1;;
   esac
