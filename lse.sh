@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 # vim: set ts=2 sw=2 sts=2 et:
 
 # Author: Diego Blanco <diego.blanco@treitos.com>
@@ -84,142 +84,142 @@ lse_executed_tests=""
 lse_DEBUG=false
 
 # internal data
-lse_common_setuid=(
-  '/bin/fusermount'
-  '/bin/mount'
-  '/bin/ntfs-3g'
-  '/bin/ping'
-  '/bin/ping6'
-  '/bin/su'
-  '/bin/umount'
-  '/lib64/dbus-1/dbus-daemon-launch-helper'
-  '/sbin/mount.ecryptfs_private'
-  '/sbin/mount.nfs'
-  '/sbin/pam_timestamp_check'
-  '/sbin/pccardctl'
-  '/sbin/unix2_chkpwd'
-  '/sbin/unix_chkpwd'
-  '/usr/bin/Xorg'
-  '/usr/bin/arping'
-  '/usr/bin/at'
-  '/usr/bin/beep'
-  '/usr/bin/chage'
-  '/usr/bin/chfn'
-  '/usr/bin/chsh'
-  '/usr/bin/crontab'
-  '/usr/bin/expiry'
-  '/usr/bin/firejail'
-  '/usr/bin/fusermount'
-  '/usr/bin/fusermount-glusterfs'
-  '/usr/bin/gpasswd'
-  '/usr/bin/kismet_capture'
-  '/usr/bin/mount'
-  '/usr/bin/mtr'
-  '/usr/bin/newgidmap'
-  '/usr/bin/newgrp'
-  '/usr/bin/newuidmap'
-  '/usr/bin/passwd'
-  '/usr/bin/pkexec'
-  '/usr/bin/procmail'
-  '/usr/bin/staprun'
-  '/usr/bin/su'
-  '/usr/bin/sudo'
-  '/usr/bin/sudoedit'
-  '/usr/bin/traceroute6.iputils'
-  '/usr/bin/umount'
-  '/usr/bin/weston-launch'
-  '/usr/lib/chromium-browser/chrome-sandbox'
-  '/usr/lib/dbus-1.0/dbus-daemon-launch-helper'
-  '/usr/lib/dbus-1/dbus-daemon-launch-helper'
-  '/usr/lib/eject/dmcrypt-get-device'
-  '/usr/lib/openssh/ssh-keysign'
-  '/usr/lib/policykit-1/polkit-agent-helper-1'
-  '/usr/lib/polkit-1/polkit-agent-helper-1'
-  '/usr/lib/pt_chown'
-  '/usr/lib/snapd/snap-confine'
-  '/usr/lib/spice-gtk/spice-client-glib-usb-acl-helper'
-  '/usr/lib/x86_64-linux-gnu/lxc/lxc-user-nic'
-  '/usr/lib/xorg/Xorg.wrap'
-  '/usr/libexec/Xorg.wrap'
-  '/usr/libexec/abrt-action-install-debuginfo-to-abrt-cache'
-  '/usr/libexec/dbus-1/dbus-daemon-launch-helper'
-  '/usr/libexec/gstreamer-1.0/gst-ptp-helper'
-  '/usr/libexec/openssh/ssh-keysign'
-  '/usr/libexec/polkit-1/polkit-agent-helper-1'
-  '/usr/libexec/pt_chown'
-  '/usr/libexec/qemu-bridge-helper'
-  '/usr/libexec/spice-gtk-x86_64/spice-client-glib-usb-acl-helper'
-  '/usr/sbin/exim4'
-  '/usr/sbin/grub2-set-bootflag'
-  '/usr/sbin/mount.nfs'
-  '/usr/sbin/mtr-packet'
-  '/usr/sbin/pam_timestamp_check'
-  '/usr/sbin/pppd'
-  '/usr/sbin/pppoe-wrapper'
-  '/usr/sbin/suexec'
-  '/usr/sbin/unix_chkpwd'
-  '/usr/sbin/userhelper'
-  '/usr/sbin/usernetctl'
-  '/usr/sbin/uuidd'
-)
+lse_common_setuid="
+/bin/fusermount
+/bin/mount
+/bin/ntfs-3g
+/bin/ping
+/bin/ping6
+/bin/su
+/bin/umount
+/lib64/dbus-1/dbus-daemon-launch-helper
+/sbin/mount.ecryptfs_private
+/sbin/mount.nfs
+/sbin/pam_timestamp_check
+/sbin/pccardctl
+/sbin/unix2_chkpwd
+/sbin/unix_chkpwd
+/usr/bin/Xorg
+/usr/bin/arping
+/usr/bin/at
+/usr/bin/beep
+/usr/bin/chage
+/usr/bin/chfn
+/usr/bin/chsh
+/usr/bin/crontab
+/usr/bin/expiry
+/usr/bin/firejail
+/usr/bin/fusermount
+/usr/bin/fusermount-glusterfs
+/usr/bin/gpasswd
+/usr/bin/kismet_capture
+/usr/bin/mount
+/usr/bin/mtr
+/usr/bin/newgidmap
+/usr/bin/newgrp
+/usr/bin/newuidmap
+/usr/bin/passwd
+/usr/bin/pkexec
+/usr/bin/procmail
+/usr/bin/staprun
+/usr/bin/su
+/usr/bin/sudo
+/usr/bin/sudoedit
+/usr/bin/traceroute6.iputils
+/usr/bin/umount
+/usr/bin/weston-launch
+/usr/lib/chromium-browser/chrome-sandbox
+/usr/lib/dbus-1.0/dbus-daemon-launch-helper
+/usr/lib/dbus-1/dbus-daemon-launch-helper
+/usr/lib/eject/dmcrypt-get-device
+/usr/lib/openssh/ssh-keysign
+/usr/lib/policykit-1/polkit-agent-helper-1
+/usr/lib/polkit-1/polkit-agent-helper-1
+/usr/lib/pt_chown
+/usr/lib/snapd/snap-confine
+/usr/lib/spice-gtk/spice-client-glib-usb-acl-helper
+/usr/lib/x86_64-linux-gnu/lxc/lxc-user-nic
+/usr/lib/xorg/Xorg.wrap
+/usr/libexec/Xorg.wrap
+/usr/libexec/abrt-action-install-debuginfo-to-abrt-cache
+/usr/libexec/dbus-1/dbus-daemon-launch-helper
+/usr/libexec/gstreamer-1.0/gst-ptp-helper
+/usr/libexec/openssh/ssh-keysign
+/usr/libexec/polkit-1/polkit-agent-helper-1
+/usr/libexec/pt_chown
+/usr/libexec/qemu-bridge-helper
+/usr/libexec/spice-gtk-x86_64/spice-client-glib-usb-acl-helper
+/usr/sbin/exim4
+/usr/sbin/grub2-set-bootflag
+/usr/sbin/mount.nfs
+/usr/sbin/mtr-packet
+/usr/sbin/pam_timestamp_check
+/usr/sbin/pppd
+/usr/sbin/pppoe-wrapper
+/usr/sbin/suexec
+/usr/sbin/unix_chkpwd
+/usr/sbin/userhelper
+/usr/sbin/usernetctl
+/usr/sbin/uuidd
+"
 #regex rules for common setuid
-lse_common_setuid+=(
-  '/snap/core/.*'
-  '/var/tmp/mkinitramfs.*'
-)
+lse_common_setuid="$lse_common_setuid
+/snap/core/.*
+/var/tmp/mkinitramfs.*
+"
 #critical writable files
-lse_critical_writable=(
-  '/etc/apache2/apache2.conf'
-  '/etc/apache2/httpd.conf'
-  '/etc/bash.bashrc'
-  '/etc/bash_completion'
-  '/etc/bash_completion.d/*'
-  '/etc/environment'
-  '/etc/environment.d/*'
-  '/etc/hosts.allow'
-  '/etc/hosts.deny'
-  '/etc/httpd/conf/httpd.conf'
-  '/etc/httpd/httpd.conf'
-  '/etc/incron.conf'
-  '/etc/incron.d/*'
-  '/etc/logrotate.d/*'
-  '/etc/modprobe.d/*'
-  '/etc/pam.d/*'
-  '/etc/passwd'
-  '/etc/php*/fpm/pool.d/*'
-  '/etc/php/*/fpm/pool.d/*'
-  '/etc/profile'
-  '/etc/profile.d/*'
-  '/etc/rc*.d/*'
-  '/etc/rsyslog.d/*'
-  '/etc/shadow'
-  '/etc/skel/*'
-  '/etc/sudoers'
-  '/etc/sudoers.d/*'
-  '/etc/supervisor/conf.d/*'
-  '/etc/supervisor/supervisord.conf'
-  '/etc/sysctl.conf'
-  '/etc/sysctl.d/*'
-  '/etc/uwsgi/apps-enabled/*'
-  '/root/.ssh/authorized_keys'
-)
+lse_critical_writable="
+/etc/apache2/apache2.conf
+/etc/apache2/httpd.conf
+/etc/bash.bashrc
+/etc/bash_completion
+/etc/bash_completion.d/*
+/etc/environment
+/etc/environment.d/*
+/etc/hosts.allow
+/etc/hosts.deny
+/etc/httpd/conf/httpd.conf
+/etc/httpd/httpd.conf
+/etc/incron.conf
+/etc/incron.d/*
+/etc/logrotate.d/*
+/etc/modprobe.d/*
+/etc/pam.d/*
+/etc/passwd
+/etc/php*/fpm/pool.d/*
+/etc/php/*/fpm/pool.d/*
+/etc/profile
+/etc/profile.d/*
+/etc/rc*.d/*
+/etc/rsyslog.d/*
+/etc/shadow
+/etc/skel/*
+/etc/sudoers
+/etc/sudoers.d/*
+/etc/supervisor/conf.d/*
+/etc/supervisor/supervisord.conf
+/etc/sysctl.conf
+/etc/sysctl.d/*
+/etc/uwsgi/apps-enabled/*
+/root/.ssh/authorized_keys
+"
 #critical writable directories
-lse_critical_writable_dirs=(
-  '/etc/bash_completion.d'
-  '/etc/cron.d'
-  '/etc/cron.daily'
-  '/etc/cron.hourly'
-  '/etc/cron.weekly'
-  '/etc/environment.d'
-  '/etc/logrotate.d'
-  '/etc/modprobe.d'
-  '/etc/pam.d'
-  '/etc/profile.d'
-  '/etc/rsyslog.d/'
-  '/etc/sudoers.d/'
-  '/etc/sysctl.d'
-  '/root'
-)
+lse_critical_writable_dirs="
+/etc/bash_completion.d
+/etc/cron.d
+/etc/cron.daily
+/etc/cron.hourly
+/etc/cron.weekly
+/etc/environment.d
+/etc/logrotate.d
+/etc/modprobe.d
+/etc/pam.d
+/etc/profile.d
+/etc/rsyslog.d/
+/etc/sudoers.d/
+/etc/sysctl.d
+/root
+"
 #)
 
 #( Options
@@ -243,12 +243,12 @@ lse_error() {
   cecho "${red}ERROR: ${reset}$*\n" >&2
 }
 lse_exclude_paths() {
-  local IFS=$'\r\n'
-  local GLOBIGNORE='*'
+  local IFS="
+"
   for p in `echo $1 | tr ',' '\n'`; do
-    [ "${p:0:1}" == "/" ] || lse_error "'$p' is not an absolute path."
-    [ "${p: -1}" == "/" ] && p="${p%%/}"
-    lse_find_opts+=" -path ${p} -prune -o"
+    [ "`printf $p | cut -c1`" = "/" ] || lse_error "'$p' is not an absolute path."
+    p="${p%%/}"
+    lse_find_opts="$lse_find_opts -path ${p} -prune -o"
   done
 }
 lse_set_level() {
@@ -317,7 +317,7 @@ lse_test_passed() {
   # Checks if a test passed by ID
   local id="$1"
   for i in $lse_passed_tests; do
-    [ "$i" == "$id" ] && return 0
+    [ "$i" = "$id" ] && return 0
   done
   return 1
 }
@@ -345,7 +345,7 @@ lse_test() {
   if [ "$lse_selection" ]; then
     local sel_match=false
     for s in $lse_selection; do
-      if [ "$s" == "$id" ] || [ "$s" == "${id:0:3}" ]; then
+      if [ "$s" = "$id" ] || [ "$s" = "`printf '$id' | cut -c1-3`" ]; then
         sel_match=true
       fi
     done
@@ -364,7 +364,7 @@ lse_test() {
   # Check dependencies
   local non_met_deps=""
   for d in $deps; do
-    lse_test_passed "$d" || non_met_deps+="$d"
+    lse_test_passed "$d" || non_met_deps="$non_met_deps $d"
   done
   if [ "$non_met_deps" ]; then
     cecho " ${grey}skip\n"
@@ -392,14 +392,14 @@ lse_test() {
     fi
     [ "$var" ] && readonly "${var}=$output"
     # Mark test as executed
-    lse_executed_tests+=" $id"
+    lse_executed_tests="$lse_executed_tests $id"
   fi
 
   if [ -z "$output" ]; then
     cecho "${grey} nope${reset}\n"
     return 1
   else
-    lse_passed_tests+=" $id"
+    lse_passed_tests="$lse_passed_tests $id"
     cecho "${r} yes!${reset}\n"
     if [ $lse_level -ge $level ]; then
       cecho "${grey}---$reset\n"
@@ -444,7 +444,7 @@ lse_header() {
   if [ "$lse_selection" ]; then
     local sel_match=false
     for s in $lse_selection; do
-      if [ "${s:0:3}" == "$id" ]; then
+      if [ "`printf $s|cut -c1-3`" = "$id" ]; then
         sel_match=true
         break
       fi
@@ -453,16 +453,16 @@ lse_header() {
   fi
 
   for i in $(seq ${#title} 70); do
-    text+="="
+    text="$text="
   done
-  text+="(${green} $title ${magenta})====="
+  text="$text(${green} $title ${magenta})====="
   cecho "$text${reset}\n"
 }
 lse_exit() {
   local ec=1
   local text="\n${magenta}=================================="
   [ "$1" ] && ec=$1
-  text+="(${green} FINISHED ${magenta})=================================="
+  text="$text(${green} FINISHED ${magenta})=================================="
   cecho "$text${reset}\n"
   exit $ec
 }
@@ -526,7 +526,7 @@ lse_run_tests_users() {
   #check if . is in PATHs
   lse_test "usr080" "0" \
     "Is '.' in a PATH variable defined inside /etc?" \
-    'for ep in $lse_exec_paths; do [ "$ep" == "." ] && grep -ER "^ *PATH=.*" /etc/ 2> /dev/null | tr -d \"\'"'"' | grep -E "[=:]\.([:[:space:]]|\$)";done' \
+    'for ep in $lse_exec_paths; do [ "$ep" = "." ] && grep -ER "^ *PATH=.*" /etc/ 2> /dev/null | tr -d \"\'"'"' | grep -E "[=:]\.([:[:space:]]|\$)";done' \
     "usr070"
 }
 
@@ -604,7 +604,8 @@ lse_run_tests_filesystem() {
   #uncommon setuid binaries
   lse_test "fst020" "0" \
     "Uncommon setuid binaries" \
-    'local setuidbin="$lse_setuid_binaries"; for cs in "${lse_common_setuid[@]}"; do setuidbin=`echo -e "$setuidbin" | grep -Ev "$cs"`;done ; echo -e "$setuidbin"' \
+    'local setuidbin="$lse_setuid_binaries"; local IFS="
+"; for cs in ${lse_common_setuid}; do setuidbin=`printf "$setuidbin\n" | grep -Ev "$cs"`;done ; printf "$setuidbin\n"' \
     "fst010"
 
   #can we write to any setuid binary
@@ -622,7 +623,7 @@ lse_run_tests_filesystem() {
   #uncommon setgid binaries
   lse_test "fst050" "0" \
     "Uncommon setgid binaries" \
-    'echo -e "$lse_setgid_binaries" | grep -Ev "^/(bin|sbin|usr/bin|usr/lib|usr/sbin)"' \
+    'printf "$lse_setgid_binaries\n" | grep -Ev "^/(bin|sbin|usr/bin|usr/lib|usr/sbin)"' \
     "fst040"
 
   #can we write to any setgid binary
@@ -679,13 +680,15 @@ lse_run_tests_filesystem() {
   #can we write to files that can give us root
   lse_test "fst160" "0" \
     "Can we write to critical files?" \
-    'for uw in $lse_user_writable; do [ -f "$uw" ] && for cw in "${lse_critical_writable[@]}"; do [ "$cw" == "$uw" ] && [ -w "$cw" ] && ls -l $cw; done ; done' \
+    'for uw in $lse_user_writable; do [ -f "$uw" ] && IFS="
+"; for cw in ${lse_critical_writable}; do [ "$cw" = "$uw" ] && [ -w "$cw" ] && ls -l $cw; done ; done' \
     "fst000"
 
   #can we write to directories that can give us root
   lse_test "fst170" "0" \
     "Can we write to critical directories?" \
-    'for uw in $lse_user_writable; do [ -d "$uw" ] && for cw in "${lse_critical_writable_dirs[@]}"; do [ "$cw" == "$uw" ] && [ -w "$cw" ] && ls -ld $cw; done ; done' \
+    'for uw in $lse_user_writable; do [ -d "$uw" ] && IFS="
+"; for cw in ${lse_critical_writable_dirs}; do [ "$cw" = "$uw" ] && [ -w "$cw" ] && ls -ld $cw; done ; done' \
     "fst000"
 
   #can we write to directories inside PATHS
@@ -760,7 +763,7 @@ lse_run_tests_system() {
   #check for superuser accounts
   lse_test "sys040" "1" \
     "Check for other superuser accounts" \
-    'for u in $(cut -d: -f1 /etc/passwd); do [ $(id -u $u) == 0 ] && echo $u; done | grep -v root'
+    'for u in $(cut -d: -f1 /etc/passwd); do [ $(id -u $u) = 0 ] && echo $u; done | grep -v root'
 
   #can root log in via SSH
   lse_test "sys050" "1" \
@@ -803,12 +806,12 @@ lse_run_tests_security() {
   #check if we can write an a binary with capabilities
   lse_test "sec020" "0" \
     "Can we write to a binary with caps?" \
-    'for b in $(echo -e "$lse_cap_bin" | cut -d" " -f1); do [ -w "$b" ] && echo "$b"; done'
+    'for b in $(printf "$lse_cap_bin\n" | cut -d" " -f1); do [ -w "$b" ] && echo "$b"; done'
 
   #check if we have all capabilities in any binary
   lse_test "sec030" "0" \
     "Do we have all caps in any binary?" \
-    'echo -e "$lse_cap_bin" | grep -v "cap_"'
+    'printf "$lse_cap_bin\n" | grep -v "cap_"'
 
   #search /etc/security/capability.conf for users associated capapilies
   lse_test "sec040" "1" \
@@ -820,7 +823,7 @@ lse_run_tests_security() {
   #does user have capabilities
   lse_test "sec050" "0" \
     "Does current user have capabilities?" \
-    'echo -e "$lse_user_caps" | grep "$lse_user"' \
+    'printf "$lse_user_caps\n" | grep "$lse_user"' \
     "sec040"
 }
 
@@ -883,7 +886,7 @@ lse_run_tests_recurrent_tasks() {
   #can we write in any system timer?
   lse_test "ret510" "0" \
     "Can we write in any system timer?" \
-    'echo -e "$lse_user_writable" | grep -E "\.timer$"' \
+    'printf "$lse_user_writable\n" | grep -E "\.timer$"' \
     "fst000"
 
   #system timers
@@ -952,7 +955,7 @@ lse_run_tests_services() {
   #check write permissions in init.d/* inetd.conf xinetd.conf
   lse_test "srv000" "0" \
     "Can we write in service files?" \
-    'echo -e "$lse_user_writable" | grep -E "^/etc/(init/|init\.d/|rc\.d/|rc[0-9S]\.d/|rc\.local|inetd\.conf|xinetd\.conf|xinetd\.d/)"' \
+    'printf "$lse_user_writable\n" | grep -E "^/etc/(init/|init\.d/|rc\.d/|rc[0-9S]\.d/|rc\.local|inetd\.conf|xinetd\.conf|xinetd\.d/)"' \
     "fst000"
 
   #check write permissions for binaries involved in services
@@ -1019,7 +1022,7 @@ lse_run_tests_services() {
   #check write permissions in systemd services
   lse_test "srv500" "0" \
     "Can we write in systemd service files?" \
-    'echo -e "$lse_user_writable" | grep -E "^/(etc/systemd/|lib/systemd/).+\.service$"' \
+    'printf "$lse_user_writable\n" | grep -E "^/(etc/systemd/|lib/systemd/).+\.service$"' \
     "fst000"
 
   #check write permissions for binaries involved in systemd services
@@ -1059,7 +1062,7 @@ lse_run_tests_processes() {
   #list processes running as users with shell
   lse_test "pro020" "1" \
     "Processes running by non-root users with shell" \
-    'for user in `echo -e "$lse_shell_users" | cut -d: -f1 | grep -v root`; do ps -u "$user" | grep -Eq "^ *[0-9]" && echo -e "\n\n------ $user ------\n\n" && ps -u $user -f; done' \
+    'for user in `printf "$lse_shell_users\n" | cut -d: -f1 | grep -v root`; do ps -u "$user" | grep -Eq "^ *[0-9]" && printf "\n\n------ $user ------\n\n\n" && ps -u $user -f; done' \
     "usr030"
 
   #running processes
@@ -1070,7 +1073,7 @@ lse_run_tests_processes() {
   #list running process binaries and their permissions
   lse_test "pro510" "2" \
     "Running process binaries and permissions" \
-    'echo -e "$lse_proc_bin" | xargs -n1 ls -l'
+    'printf "$lse_proc_bin\n" | xargs -n1 ls -l'
 }
 
 
@@ -1173,14 +1176,14 @@ while getopts "hcil:e:s:" option; do
     e) lse_exclude_paths "${OPTARG}";;
     i) lse_interactive=false;;
     l) lse_set_level "${OPTARG}";;
-    s) lse_selection="${OPTARG//,/ }";;
+    s) lse_selection="`printf ${OPTARG}|sed 's/,/ /g'`";;
     h) lse_help; exit 0;;
     *) lse_help; exit 1;;
   esac
 done
 
 #trap to exec on SIGINT
-trap "lse_exit 1" SIGINT
+trap "lse_exit 1" 2
 
 lse_request_information
 lse_show_info
