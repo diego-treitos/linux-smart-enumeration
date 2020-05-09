@@ -16,7 +16,9 @@ Unlike LinEnum, `lse` tries to gradualy expose the information depending on its 
 
 ## What is it?
 
-This script will show relevant information about the security of the local Linux system.
+This shell script will show relevant information about the security of the local Linux system.
+
+From version **2.0** it is *mostly* **POSIX** compliant and tested with `shellcheck` and `posh`.
 
 It has 3 levels of verbosity so you can control how much information you see.
 
