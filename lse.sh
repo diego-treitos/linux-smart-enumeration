@@ -82,6 +82,8 @@ lse_distro=`command -v lsb_release >/dev/null 2>&1 && lsb_release -d | sed 's/De
 lse_passed_tests=""
 lse_executed_tests=""
 lse_DEBUG=false
+lse_procmon_data=`mktemp`
+lse_procmon_lock=`mktemp`
 
 # internal data
 lse_common_setuid="
@@ -225,6 +227,7 @@ lse_critical_writable_dirs="
 #( Options
 lse_color=true
 lse_interactive=true
+lse_proc_time=60
 lse_level=0 #Valid levels 0:default, 1:interesting, 2:all
 lse_selection="" #Selected tests to run. Empty means all.
 lse_find_opts='-path /proc -prune -o -path /sys -prune -o -path /dev -prune -o -path /run -prune -o' #paths to exclude from searches
@@ -289,6 +292,8 @@ lse_help() {
   echo "               Specific tests can be used with their IDs (i.e.: usr020,sud)"
   echo "  -e PATHS     Comma separated list of paths to exclude. This allows you"
   echo "               to do faster scans at the cost of completeness"
+  echo "  -p SECONDS   Time that the process monitor will spend watching for"
+  echo "               processes. A value of 0 will disable any watch (default: 60)"
 }
 lse_ask() {
   local question="$1"
@@ -464,7 +469,15 @@ lse_exit() {
   [ "$1" ] && ec=$1
   text="$text(${green} FINISHED ${magenta})=================================="
   cecho "$text${reset}\n"
+  rm -f "$lse_procmon_data"
+  rm -f "$lse_procmon_lock"
   exit "$ec"
+}
+lse_procmon() {
+  while [ -f "$lse_procmon_lock" ]; do
+    ps -ewwwo pid,user:50,args
+    sleep 0.001
+  done | grep -v 'ewwwo pid,user:50,args' | sed 's/^ *//g' | tr -s '[:space:]' | grep -Ev '^[0-9]+ [^ ]+ \[' | grep -v "^PID" | sort -u > "$lse_procmon_data"
 }
 #)
 
@@ -1137,46 +1150,69 @@ lse_run_tests_containers() {
 lse_run_tests_processes() {
   lse_header "pro" "processes"
 
-  #lookup process binaries
-  lse_proc_bin=`(ps -eo comm | sort | uniq | xargs which)2>/dev/null`
+  #wait for the process monitor to finish gathering data
+  lse_test "pro000" "2" \
+    "Waiting for the process monitor to finish" \
+    'while [ ! -s "$lse_procmon_data" ]; do sleep 1; done; cat "$lse_procmon_data"'\
+    "" \
+    "lse_procs"
+
+  #look for the paths of the process binaries
+  lse_test "pro001" "2" \
+    "Retrieving process binaries" \
+    'printf "%s" "$lse_procs" | cut -d" " -f3 | sort -u | xargs -r which' \
+    "pro000" \
+    'lse_proc_bin'
+
+  #look for the users running the
+  lse_test "pro002" "2" \
+    "Retrieving process users" \
+    'printf "%s" "$lse_procs" | cut -d" " -f2 | sort -u' \
+    "pro000" \
+    'lse_proc_users'
 
   #check if we have write permissions in any process binary
-  lse_test "pro000" "0" \
+  lse_test "pro010" "0" \
     "Can we write in any process binary?" \
-    'for b in $lse_proc_bin; do [ -w "$b" ] && echo $b; done'
+    'for b in $lse_proc_bin; do [ -w "$b" ] && echo $b; done'\
+    "pro001"
 
   #list processes running as root
-  lse_test "pro010" "1" \
+  lse_test "pro020" "1" \
     "Processes running with root permissions" \
-    'ps -u root -f | grep -Ev "\[[[:alnum:]]"'
+    'printf "%s" "$lse_procs" | grep -E "^[0-9]+ root"' \
+    "pro000"
 
   #list processes running as users with shell
-  lse_test "pro020" "1" \
+  lse_test "pro030" "1" \
     "Processes running by non-root users with shell" \
-    'for user in `printf "$lse_shell_users\n" | cut -d: -f1 | grep -v root`; do ps -u "$user" | grep -Eq "^ *[0-9]" && printf "\n\n------ $user ------\n\n\n" && ps -u $user -f; done' \
-    "usr030"
+    'for user in `printf "%s\n" "$lse_shell_users" | cut -d: -f1 | grep -v root`; do printf "%s" "$lse_proc_users" | grep -qE "(^| )$user( |\$)" && printf "\n\n------ $user ------\n\n\n" && printf "%s" "$lse_procs" | grep -E "^[0-9]+ $user"; done' \
+    "usr030 pro000 pro002"
 
   #running processes
   lse_test "pro500" "2" \
     "Running processes" \
-    'ps auxf'
+    'printf "%s\n" "$lse_procs"' \
+    "pro000"
 
   #list running process binaries and their permissions
   lse_test "pro510" "2" \
     "Running process binaries and permissions" \
-    'printf "$lse_proc_bin\n" | xargs -n1 ls -l'
+    'printf "%s\n" "$lse_proc_bin" | xargs -n1 ls -l' \
+    "pro001"
 }
 #
 ##)
 
 #( Main
-while getopts "hcil:e:s:" option; do
+while getopts "hcil:e:p:s:" option; do
   case "${option}" in
     c) lse_color=false;;
     e) lse_exclude_paths "${OPTARG}";;
     i) lse_interactive=false;;
     l) lse_set_level "${OPTARG}";;
     s) lse_selection="`printf \"${OPTARG}\"|sed 's/,/ /g'`";;
+    p) lse_proc_time="${OPTARG}";;
     h) lse_help; exit 0;;
     *) lse_help; exit 1;;
   esac
@@ -1189,6 +1225,9 @@ lse_request_information
 lse_show_info
 PATH="$PATH:/sbin:/usr/sbin" #fix path just in case
 
+lse_procmon &
+(sleep $lse_proc_time; rm -f "$lse_procmon_lock") &
+
 lse_run_tests_users
 lse_run_tests_sudo
 lse_run_tests_filesystem
@@ -1197,9 +1236,9 @@ lse_run_tests_security
 lse_run_tests_recurrent_tasks
 lse_run_tests_network
 lse_run_tests_services
-lse_run_tests_processes
 lse_run_tests_software
 lse_run_tests_containers
+lse_run_tests_processes
 
 lse_exit 0
 #)
