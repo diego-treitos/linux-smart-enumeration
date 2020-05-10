@@ -1042,41 +1042,6 @@ lse_run_tests_services() {
 }
 
 
-####################################################################( processes
-lse_run_tests_processes() {
-  lse_header "pro" "processes"
-
-  #lookup process binaries
-  lse_proc_bin=`(ps -eo comm | sort | uniq | xargs which)2>/dev/null`
-
-  #check if we have write permissions in any process binary
-  lse_test "pro000" "0" \
-    "Can we write in any process binary?" \
-    'for b in $lse_proc_bin; do [ -w "$b" ] && echo $b; done'
-
-  #list processes running as root
-  lse_test "pro010" "1" \
-    "Processes running with root permissions" \
-    'ps -u root -f | grep -Ev "\[[[:alnum:]]"'
-
-  #list processes running as users with shell
-  lse_test "pro020" "1" \
-    "Processes running by non-root users with shell" \
-    'for user in `printf "$lse_shell_users\n" | cut -d: -f1 | grep -v root`; do ps -u "$user" | grep -Eq "^ *[0-9]" && printf "\n\n------ $user ------\n\n\n" && ps -u $user -f; done' \
-    "usr030"
-
-  #running processes
-  lse_test "pro500" "2" \
-    "Running processes" \
-    'ps auxf'
-
-  #list running process binaries and their permissions
-  lse_test "pro510" "2" \
-    "Running process binaries and permissions" \
-    'printf "$lse_proc_bin\n" | xargs -n1 ls -l'
-}
-
-
 #####################################################################( software
 lse_run_tests_software() {
   lse_header "sof" "software"
@@ -1165,6 +1130,41 @@ lse_run_tests_containers() {
   lse_test "ctn210" "0" \
     "Is the user a member of any lxc/lxd group?" \
     'groups | grep "lxc\|lxd"'
+}
+
+
+####################################################################( processes
+lse_run_tests_processes() {
+  lse_header "pro" "processes"
+
+  #lookup process binaries
+  lse_proc_bin=`(ps -eo comm | sort | uniq | xargs which)2>/dev/null`
+
+  #check if we have write permissions in any process binary
+  lse_test "pro000" "0" \
+    "Can we write in any process binary?" \
+    'for b in $lse_proc_bin; do [ -w "$b" ] && echo $b; done'
+
+  #list processes running as root
+  lse_test "pro010" "1" \
+    "Processes running with root permissions" \
+    'ps -u root -f | grep -Ev "\[[[:alnum:]]"'
+
+  #list processes running as users with shell
+  lse_test "pro020" "1" \
+    "Processes running by non-root users with shell" \
+    'for user in `printf "$lse_shell_users\n" | cut -d: -f1 | grep -v root`; do ps -u "$user" | grep -Eq "^ *[0-9]" && printf "\n\n------ $user ------\n\n\n" && ps -u $user -f; done' \
+    "usr030"
+
+  #running processes
+  lse_test "pro500" "2" \
+    "Running processes" \
+    'ps auxf'
+
+  #list running process binaries and their permissions
+  lse_test "pro510" "2" \
+    "Running process binaries and permissions" \
+    'printf "$lse_proc_bin\n" | xargs -n1 ls -l'
 }
 #
 ##)
