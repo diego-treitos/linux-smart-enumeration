@@ -533,7 +533,7 @@ lse_run_tests_users() {
   #find defined PATHs
   lse_test "usr070" "1" \
     "PATH variables defined inside /etc" \
-    'for p in `grep -ERh "^ *PATH=.*" /etc/ 2> /dev/null | tr -d \"\'"'"' | cut -d= -f2 | tr ":" "\n" | sort | uniq`; do [ -d "$p" ] && echo "$p";done' \
+    'for p in `grep -ERh "^ *PATH=.*" /etc/ 2> /dev/null | tr -d \"\'"'"' | cut -d= -f2 | tr ":" "\n" | sort -u`; do [ -d "$p" ] && echo "$p";done' \
     "" \
     "lse_exec_paths"
 
@@ -659,7 +659,7 @@ lse_run_tests_filesystem() {
   #check for SSH files in home directories
   lse_test "fst090" "1" \
     "SSH files in home directories" \
-    'for h in $(cut -d: -f6 /etc/passwd | sort | uniq | grep -Ev "^(/|/dev|/bin|/proc|/run/.*|/var/run/.*)$"); do find "$h" \( -name "*id_dsa*" -o -name "*id_rsa*" -o -name "*id_ecdsa*" -o -name "*id_ed25519*" -o -name "known_hosts" -o -name "authorized_hosts" -o -name "authorized_keys" \) -exec ls -la {} \; ; done'
+    'for h in $(cut -d: -f6 /etc/passwd | sort -u | grep -Ev "^(/|/dev|/bin|/proc|/run/.*|/var/run/.*)$"); do find "$h" \( -name "*id_dsa*" -o -name "*id_rsa*" -o -name "*id_ecdsa*" -o -name "*id_ed25519*" -o -name "known_hosts" -o -name "authorized_hosts" -o -name "authorized_keys" \) -exec ls -la {} \; ; done'
 
   #check useful binaries
   lse_test "fst100" "1" \
@@ -875,7 +875,7 @@ lse_run_tests_recurrent_tasks() {
   #can we write to any paths present in cron tasks?
   lse_test "ret050" "1" \
     "Can we write to any paths present in cron jobs" \
-    'for p in `grep --color=never -hERoi "/[a-z0-9_/\.\-]+" /etc/cron* | sort | uniq`; do [ -w "$p" ] && echo "$p"; done' \
+    'for p in `grep --color=never -hERoi "/[a-z0-9_/\.\-]+" /etc/cron* | sort -u`; do [ -w "$p" ] && echo "$p"; done' \
     "" \
     "lse_user_writable_cron_paths"
 
@@ -975,7 +975,7 @@ lse_run_tests_services() {
   #check write permissions for binaries involved in services
   lse_test "srv010" "0" \
     "Can we write in binaries executed by services?" \
-    'for b in $(grep -ERvh "^#" /etc/inetd.conf /etc/xinetd.conf /etc/xinetd.d/ /etc/init.d/ /etc/rc* 2>/dev/null | tr -s "[[:space:]]" "\n" | grep -E "^/" | grep -Ev "^/(dev|run|sys|proc|tmp)/" | sort | uniq); do [ -x "$b" ] && [ -w "$b" ] && echo "$b" done'
+    'for b in $(grep -ERvh "^#" /etc/inetd.conf /etc/xinetd.conf /etc/xinetd.d/ /etc/init.d/ /etc/rc* 2>/dev/null | tr -s "[[:space:]]" "\n" | grep -E "^/" | grep -Ev "^/(dev|run|sys|proc|tmp)/" | sort -u); do [ -x "$b" ] && [ -w "$b" ] && echo "$b" done'
 
   #init.d files NOT belonging to root
   lse_test "srv020" "1" \
@@ -1042,7 +1042,7 @@ lse_run_tests_services() {
   #check write permissions for binaries involved in systemd services
   lse_test "srv510" "0" \
     "Can we write in binaries executed by systemd services?" \
-    'for b in $(grep -ERh "^Exec" /etc/systemd/ /lib/systemd/ 2>/dev/null | tr "=" "\n" | tr -s "[[:space:]]" "\n" | grep -E "^/" | grep -Ev "^/(dev|run|sys|proc|tmp)/" | sort | uniq); do [ -x "$b" ] && [ -w "$b" ] && echo "$b" done'
+    'for b in $(grep -ERh "^Exec" /etc/systemd/ /lib/systemd/ 2>/dev/null | tr "=" "\n" | tr -s "[[:space:]]" "\n" | grep -E "^/" | grep -Ev "^/(dev|run|sys|proc|tmp)/" | sort -u); do [ -x "$b" ] && [ -w "$b" ] && echo "$b" done'
 
   # systemd files not belonging to root
   lse_test "srv520" "1" \
