@@ -1,4 +1,5 @@
 #!/bin/sh
+# shellcheck disable=1003,1091,2006,2016,2034,2039
 # vim: set ts=2 sw=2 sts=2 et:
 
 # Author: Diego Blanco <diego.blanco@treitos.com>
@@ -236,10 +237,10 @@ lse_find_opts='-path /proc -prune -o -path /sys -prune -o -path /dev -prune -o -
 #( Lib
 cecho() {
   if $lse_color; then
-    printf "$@"
+    printf "%b" "$@"
   else
     # If color is disabled we remove it
-    printf "$@" | sed 's/\x1B\[[0-9;]\+[A-Za-z]//g'
+    printf "%b" "$@" | sed 's/\x1B\[[0-9;]\+[A-Za-z]//g'
   fi
 }
 lse_error() {
@@ -248,8 +249,8 @@ lse_error() {
 lse_exclude_paths() {
   local IFS="
 "
-  for p in `printf "$1" | tr ',' '\n'`; do
-    [ "`printf \"$p\" | cut -c1`" = "/" ] || lse_error "'$p' is not an absolute path."
+  for p in `printf "%s" "$1" | tr ',' '\n'`; do
+    [ "`printf \"%s\" \"$p\" | cut -c1`" = "/" ] || lse_error "'$p' is not an absolute path."
     p="${p%%/}"
     lse_find_opts="$lse_find_opts -path ${p} -prune -o"
   done
@@ -350,7 +351,7 @@ lse_test() {
   if [ "$lse_selection" ]; then
     local sel_match=false
     for s in $lse_selection; do
-      if [ "$s" = "$id" ] || [ "$s" = "`printf \"$id\" | cut -c1-3`" ]; then
+      if [ "$s" = "$id" ] || [ "$s" = "`printf \"%s\" \"$id\" | cut -c1-3`" ]; then
         sel_match=true
       fi
     done
@@ -449,7 +450,7 @@ lse_header() {
   if [ "$lse_selection" ]; then
     local sel_match=false
     for s in $lse_selection; do
-      if [ "`printf \"$s\"|cut -c1-3`" = "$id" ]; then
+      if [ "`printf \"%s\" \"$s\"|cut -c1-3`" = "$id" ]; then
         sel_match=true
         break
       fi
@@ -1211,7 +1212,7 @@ while getopts "hcil:e:p:s:" option; do
     e) lse_exclude_paths "${OPTARG}";;
     i) lse_interactive=false;;
     l) lse_set_level "${OPTARG}";;
-    s) lse_selection="`printf \"${OPTARG}\"|sed 's/,/ /g'`";;
+    s) lse_selection="`printf \"%s\" \"${OPTARG}\"|sed 's/,/ /g'`";;
     p) lse_proc_time="${OPTARG}";;
     h) lse_help; exit 0;;
     *) lse_help; exit 1;;
@@ -1226,7 +1227,7 @@ lse_show_info
 PATH="$PATH:/sbin:/usr/sbin" #fix path just in case
 
 lse_procmon &
-(sleep $lse_proc_time; rm -f "$lse_procmon_lock") &
+(sleep "$lse_proc_time"; rm -f "$lse_procmon_lock") &
 
 lse_run_tests_users
 lse_run_tests_sudo
