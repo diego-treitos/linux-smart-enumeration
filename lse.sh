@@ -475,10 +475,29 @@ lse_exit() {
   exit "$ec"
 }
 lse_procmon() {
+  # monitor processes
+  #NOTE: The first number will be the number of occurrences of a process due to 
+  #      uniq -c
   while [ -f "$lse_procmon_lock" ]; do
-    ps -ewwwo pid,user:50,args
+    ps -ewwwo start_time,pid,user:50,args
     sleep 0.001
-  done | grep -v 'ewwwo pid,user:50,args' | sed 's/^ *//g' | tr -s '[:space:]' | grep -Ev '^[0-9]+ [^ ]+ \[' | grep -v "^PID" | sort -u > "$lse_procmon_data"
+  done | grep -v 'ewwwo start_time,pid,user:50,args' | sed 's/^ *//g' | tr -s '[:space:]' | grep -v "^START" | grep -Ev '[^ ]+ [^ ]+ [^ ]+ \[' | sort -Mr | uniq -c | sed 's/^ *//g' > "$lse_procmon_data"
+}
+lse_proc_print() {
+  # Pretty prints output from lse_procmom received via stdin
+  printf "${green}%s %8s %8s %s\n" "START" "PID" "USER" "COMMAND"
+  while read -r l; do
+    p_num=`echo "$l" | cut -d" " -f1`
+    p_time=`echo "$l" | cut -d" " -f2`
+    p_pid=`echo "$l" | cut -d" " -f3`
+    p_user=`echo "$l" | cut -d" " -f4`
+    p_args=`echo "$l" | cut -d" " -f5-`
+    if [ $((p_num)) -lt 20 ]; then # few times probably periodic
+      printf "${red}%s ${reset}%8s ${yellow}%8s ${red}%s\n" "$p_time" "$p_pid" "$p_user" "$p_args"
+    else
+      printf "${magenta}%s ${reset}%8s ${yellow}%8s ${reset}%s\n" "$p_time" "$p_pid" "$p_user" "$p_args"
+    fi
+  done
 }
 #)
 
@@ -1161,14 +1180,14 @@ lse_run_tests_processes() {
   #look for the paths of the process binaries
   lse_test "pro001" "2" \
     "Retrieving process binaries" \
-    'printf "%s" "$lse_procs" | cut -d" " -f3 | sort -u | xargs -r which' \
+    'printf "%s" "$lse_procs" | cut -d" " -f5 | sort -u | xargs -r which' \
     "pro000" \
     'lse_proc_bin'
 
   #look for the users running the
   lse_test "pro002" "2" \
     "Retrieving process users" \
-    'printf "%s" "$lse_procs" | cut -d" " -f2 | sort -u' \
+    'printf "%s" "$lse_procs" | cut -d" " -f4 | sort -u' \
     "pro000" \
     'lse_proc_users'
 
@@ -1181,25 +1200,25 @@ lse_run_tests_processes() {
   #list processes running as root
   lse_test "pro020" "1" \
     "Processes running with root permissions" \
-    'printf "%s" "$lse_procs" | grep -E "^[0-9]+ root"' \
+    'printf "%s" "$lse_procs" | grep -E "^[^ ]+ [^ ]+ [^ ]+ root" | lse_proc_print' \
     "pro000"
 
   #list processes running as users with shell
   lse_test "pro030" "1" \
     "Processes running by non-root users with shell" \
-    'for user in `printf "%s\n" "$lse_shell_users" | cut -d: -f1 | grep -v root`; do printf "%s" "$lse_proc_users" | grep -qE "(^| )$user( |\$)" && printf "\n\n------ $user ------\n\n\n" && printf "%s" "$lse_procs" | grep -E "^[0-9]+ $user"; done' \
+    'for user in `printf "%s\n" "$lse_shell_users" | cut -d: -f1 | grep -v root`; do printf "%s" "$lse_proc_users" | grep -qE "(^| )$user( |\$)" && printf "\n\n------ $user ------\n\n\n" && printf "%s" "$lse_procs" | grep -E "^[^ ]+ [^ ]+ [^ ]+ $user" | lse_proc_print; done' \
     "usr030 pro000 pro002"
 
   #running processes
   lse_test "pro500" "2" \
     "Running processes" \
-    'printf "%s\n" "$lse_procs"' \
+    'printf "%s\n" "$lse_procs" | lse_proc_print' \
     "pro000"
 
   #list running process binaries and their permissions
   lse_test "pro510" "2" \
     "Running process binaries and permissions" \
-    'printf "%s\n" "$lse_proc_bin" | xargs -n1 ls -l' \
+    'printf "%s\n" "$lse_proc_bin" | xargs ls -l' \
     "pro001"
 }
 #
