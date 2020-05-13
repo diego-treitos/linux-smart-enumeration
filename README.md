@@ -20,6 +20,8 @@ This shell script will show relevant information about the security of the local
 
 From version **2.0** it is *mostly* **POSIX** compliant and tested with `shellcheck` and `posh`.
 
+It can also **monitor processes to discover recurrent program executions**. It monitors while it is executing all the other tests so you save some time. By default it monitors during 1 minute but you can choose the watch time with the `-p` parameter.
+
 It has 3 levels of verbosity so you can control how much information you see.
 
 In the default level you should see the highly important security flaws in the system. The level `1` (`./lse.sh -l1`) shows
@@ -39,6 +41,7 @@ If not, you should try the `level 1` verbosity with `./lse.sh -l1` and you will 
 If that does not help, `level 2` will just dump everything you can gather about the service using `./lse.sh -l2`. In this case you might find useful to use `./lse.sh -l2 | less -r`.
 
 You can also select what tests to execute by passing the `-s` parameter. With it you can select specific tests or sections to be executed. For example `./lse.sh -l2 -s usr010,net,pro` will execute the test `usr010` and all the tests in the sections `net` and `pro`. 
+
 
 ```
 Use: ./lse.sh [options]
@@ -67,6 +70,8 @@ Use: ./lse.sh [options]
                Specific tests can be used with their IDs (i.e.: usr020,sud)
   -e PATHS     Comma separated list of paths to exclude. This allows you
                to do faster scans at the cost of completeness
+  -p SECONDS   Time that the process monitor will spend watching for
+               processes. A value of 0 will disable any watch (default: 60)
 ```
 ## Is it pretty?
 
