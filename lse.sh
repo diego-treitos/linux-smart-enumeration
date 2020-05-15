@@ -1113,6 +1113,11 @@ lse_run_tests_software() {
     "Found any .htpasswd files?" \
     'find / $lse_find_opts -name "*.htpasswd" -print -exec cat {} \;'
 
+  #check if there are ssh private keys in ssh-agent
+  lse_test "sof050" "0" \
+    "Are there private keys in ssh-agent?" \
+    'ssh-add -l'
+
   #sudo version - check to see if there are any known vulnerabilities with this
   lse_test "sof500" "2" \
     "Sudo version" \
