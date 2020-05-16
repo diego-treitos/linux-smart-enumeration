@@ -1118,6 +1118,11 @@ lse_run_tests_software() {
     "Are there private keys in ssh-agent?" \
     'ssh-add -l'
 
+  #check if there are gpg keys in gpg-agent
+  lse_test "sof060" "0" \
+    "Are there gpg keys cached in gpg-agent?" \
+    'gpg-connect-agent "keyinfo --list" /bye | grep "D - - 1"'
+
   #sudo version - check to see if there are any known vulnerabilities with this
   lse_test "sof500" "2" \
     "Sudo version" \
