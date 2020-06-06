@@ -86,6 +86,9 @@ lse_DEBUG=false
 lse_procmon_data=`mktemp`
 lse_procmon_lock=`mktemp`
 
+# printf
+alias printf="env printf"
+
 # internal data
 lse_common_setuid="
 /bin/fusermount
