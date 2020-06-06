@@ -1092,6 +1092,11 @@ lse_run_tests_software() {
     "Can we connect to MySQL as root without password?" \
     'mysqladmin -uroot version'
 
+  #check if there are credentials stored in .mysql-history
+  lse_test "sof015" "0" \
+    "Are there credentials in mysql_history file?" \
+    'grep -Ei "(pass|identified by)" "$lse_home/.mysql_history"'
+
   #checks to see if we can connect to postgres templates without password
   lse_test "sof020" "0" \
     "Can we connect to PostgreSQL template0 as postgres and no pass?" \
@@ -1115,6 +1120,16 @@ lse_run_tests_software() {
   lse_test "sof040" "0" \
     "Found any .htpasswd files?" \
     'find / $lse_find_opts -name "*.htpasswd" -print -exec cat {} \;'
+
+  #check if there are ssh private keys in ssh-agent
+  lse_test "sof050" "0" \
+    "Are there private keys in ssh-agent?" \
+    'ssh-add -l'
+
+  #check if there are gpg keys in gpg-agent
+  lse_test "sof060" "0" \
+    "Are there gpg keys cached in gpg-agent?" \
+    'gpg-connect-agent "keyinfo --list" /bye | grep "D - - 1"'
 
   #sudo version - check to see if there are any known vulnerabilities with this
   lse_test "sof500" "2" \
