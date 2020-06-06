@@ -578,13 +578,13 @@ lse_run_tests_sudo() {
   #can we sudo without supplying a password
   lse_test "sud000" "0" \
     "Can we sudo without a password?" \
-    'echo "" | sudo -S id' && lse_sudo=true
+    'echo "" | sudo -nS id' && lse_sudo=true
 
   #can we list sudo commands without supplying a password
   $lse_sudo || \
     lse_test "sud010" "0" \
     "Can we list sudo commands without a password?" \
-    'echo "" | sudo -S -l' \
+    'echo "" | sudo -nS -l' \
     "" \
     "lse_sudo_commands"
 
