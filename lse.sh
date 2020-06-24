@@ -234,7 +234,7 @@ lse_interactive=true
 lse_proc_time=60
 lse_level=0 #Valid levels 0:default, 1:interesting, 2:all
 lse_selection="" #Selected tests to run. Empty means all.
-lse_find_opts='-path /proc -prune -o -path /sys -prune -o -path /dev -prune -o -path /run -prune -o' #paths to exclude from searches
+lse_find_opts='-path /proc -prune -o -path /sys -prune -o -path /dev -prune -o -path /run -prune -o -path /boot -prune -o' #paths to exclude from searches
 #)
 
 #( Lib
@@ -395,7 +395,7 @@ lse_test() {
     if $lse_DEBUG; then
       output="`eval "$cmd" 2>&1`"
     else
-      # Execute comand
+      # Execute comand if this test's level is in scope
       output="`eval "$cmd" 2>/dev/null`"
     # Assign variable if available
     fi
@@ -790,11 +790,9 @@ lse_run_tests_system() {
     'grep -v "^[^:]*:[x]" /etc/group'
 
   #check if we can read any shadow file
-  for s in 'shadow' 'shadow-' 'shadow~' 'gshadow' 'gshadow-' 'master.passwd'; do
     lse_test "sys030" "0" \
-      "Can we read /etc/$s file?" \
-      'cat /etc/$s'
-  done
+      "Can we read shadow files?" \
+      'for s in "shadow" "shadow-" "shadow~" "gshadow" "gshadow-" "master.passwd"; do cat /etc/$s; done'
 
   #check for superuser accounts
   lse_test "sys040" "1" \
@@ -877,7 +875,7 @@ lse_run_tests_recurrent_tasks() {
   #cron tasks writable by user
   lse_test "ret010" "0" \
     "Cron tasks writable by user" \
-    'find -L /etc/cron* /etc/anacron /var/spool/cron -writable' \
+    'find -L /etc/cron* /etc/anacron /var/spool/cron -writable'
 
   #list cron jobs
   lse_test "ret020" "1" \
