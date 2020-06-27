@@ -790,11 +790,9 @@ lse_run_tests_system() {
     'grep -v "^[^:]*:[x]" /etc/group'
 
   #check if we can read any shadow file
-  for s in 'shadow' 'shadow-' 'shadow~' 'gshadow' 'gshadow-' 'master.passwd'; do
-    lse_test "sys030" "0" \
-      "Can we read /etc/$s file?" \
-      'cat /etc/$s'
-  done
+  lse_test "sys030" "0" \
+  "Can we read shadow files?" \
+  'for sf in "shadow" "shadow-" "shadow~" "gshadow" "gshadow-" "master.passwd"; do [ -r "/etc/$sf" ] && printf "%s\n---\n" "/etc/$sf" && cat "/etc/$sf" && printf "\n\n";done'
 
   #check for superuser accounts
   lse_test "sys040" "1" \
