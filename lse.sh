@@ -395,7 +395,7 @@ lse_test() {
     if $lse_DEBUG; then
       output="`eval "$cmd" 2>&1`"
     else
-      # Execute comand
+      # Execute command if this test's level is in scope
       output="`eval "$cmd" 2>/dev/null`"
     # Assign variable if available
     fi
@@ -875,7 +875,7 @@ lse_run_tests_recurrent_tasks() {
   #cron tasks writable by user
   lse_test "ret010" "0" \
     "Cron tasks writable by user" \
-    'find -L /etc/cron* /etc/anacron /var/spool/cron -writable' \
+    'find -L /etc/cron* /etc/anacron /var/spool/cron -writable'
 
   #list cron jobs
   lse_test "ret020" "1" \
