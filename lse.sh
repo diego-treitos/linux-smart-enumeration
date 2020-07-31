@@ -399,7 +399,7 @@ lse_test() {
       output="`eval "$cmd" 2>/dev/null`"
     # Assign variable if available
     fi
-    [ "$var" ] && readonly "${var}=$output"
+    [ "$var" ] && [ "$output" ] && readonly "${var}=$output"
     # Mark test as executed
     lse_executed_tests="$lse_executed_tests $id"
   fi
