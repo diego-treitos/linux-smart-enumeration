@@ -239,7 +239,7 @@ lse_find_opts='-path /proc -prune -o -path /sys -prune -o -path /dev -prune -o -
 
 #( Lib
 cecho() {
-  if $lse_color; then
+  if [ "$lse_color" ]; then
     printf "%b" "$@"
   else
     # If color is disabled we remove it
@@ -315,7 +315,7 @@ lse_ask() {
   esac
 }
 lse_request_information() {
-  if $lse_interactive; then
+  if [ "$lse_interactive" ]; then
   cecho "${grey}---\n"
     [ -z "$lse_user" ] && lse_user=`lse_ask "Could not find current user name. Current user?"`
     lse_pass=`lse_ask "If you know the current user password, write it here to check sudo privileges"`
@@ -367,7 +367,7 @@ lse_test() {
   # Print name and line
   cecho "${white}[${l}${white}] ${grey}${id}${white} $name${grey}"
   for i in $(seq $((${#name}+4)) 67); do
-    echo -n "."
+    printf "."
   done
 
   # Check dependencies
@@ -392,7 +392,7 @@ lse_test() {
     cecho " ${grey}skip\n"
     return 1
   else
-    if $lse_DEBUG; then
+    if [ "$lse_DEBUG" ]; then
       output="`eval "$cmd" 2>&1`"
     else
       # Execute command if this test's level is in scope
@@ -596,7 +596,7 @@ lse_run_tests_sudo() {
       'echo "$lse_pass" | sudo -S id' && lse_sudo=true
 
     #can we list sudo commands without supplying a password
-    if ! $lse_sudo && [ -z "$lse_sudo_commands" ]; then
+    if [[ ! "$lse_sudo" && -z "$lse_sudo_commands" ]]; then
       lse_test "sud030" "0" \
         "Can we list sudo commands with a password?" \
         'echo "$lse_pass" | sudo -S -l' \
