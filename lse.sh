@@ -87,7 +87,7 @@ lse_procmon_data=`mktemp`
 lse_procmon_lock=`mktemp`
 
 # printf
-alias printf="env printf"
+printf "$reset" | grep -q '\\' && alias printf="env printf"
 
 # internal data
 lse_common_setuid="
