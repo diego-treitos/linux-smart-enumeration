@@ -5,7 +5,7 @@
 # Author: Diego Blanco <diego.blanco@treitos.com>
 # GitHub: https://github.com/diego-treitos/linux-smart-enumeration
 # 
-lse_version="2.4"
+lse_version="2.5"
 
 #( Colors
 #
@@ -399,7 +399,7 @@ lse_test() {
       output="`eval "$cmd" 2>/dev/null`"
     # Assign variable if available
     fi
-    [ "$var" ] && readonly "${var}=$output"
+    [ "$var" ] && [ "$output" ] && readonly "${var}=$output"
     # Mark test as executed
     lse_executed_tests="$lse_executed_tests $id"
   fi
