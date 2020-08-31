@@ -607,8 +607,8 @@ lse_run_tests_sudo() {
 
   #check if we can read the sudoers file
   lse_test "sud040" "1" \
-    "Can we read /etc/sudoers?" \
-    'cat /etc/sudoers'
+    "Can we read sudoers files?" \
+    'grep -R "" /etc/sudoers*'
 
   #check users that sudoed in the past
   lse_test "sud050" "1" \
