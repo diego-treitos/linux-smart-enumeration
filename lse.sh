@@ -234,7 +234,7 @@ lse_interactive=true
 lse_proc_time=60
 lse_level=0 #Valid levels 0:default, 1:interesting, 2:all
 lse_selection="" #Selected tests to run. Empty means all.
-lse_find_opts='-path /proc -prune -o -path /sys -prune -o -path /dev -prune -o -path /run -prune -o' #paths to exclude from searches
+lse_find_opts='-path /proc -prune -o -path /sys -prune -o -path /dev -prune -o' #paths to exclude from searches
 #)
 
 #( Lib
@@ -1128,6 +1128,18 @@ lse_run_tests_software() {
   lse_test "sof060" "0" \
     "Are there gpg keys cached in gpg-agent?" \
     'gpg-connect-agent "keyinfo --list" /bye | grep "D - - 1"'
+
+  #check if there is a writable ssh-agent socket
+  lse_test "sof070" "0" \
+    "Can we write to a ssh-agent socket?" \
+    'for f in $lse_user_writable; do test -S "$f" && printf "$f" | grep -Ea "ssh-[A-Za-z0-9]+/agent\.[0-9]+"; done' \
+    "fst000"
+
+  #check if there is a writable gpg-agent socket
+  lse_test "sof080" "0" \
+    "Can we write to a gpg-agent socket?" \
+    'for f in $lse_user_writable; do test -S "$f" && printf "$f" | grep -a "gpg-agent"; done' \
+    "fst000"
 
   #sudo version - check to see if there are any known vulnerabilities with this
   lse_test "sof500" "2" \
