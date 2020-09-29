@@ -641,7 +641,7 @@ lse_run_tests_filesystem() {
   lse_test "fst020" "0" \
     "Uncommon setuid binaries" \
     'local setuidbin="$lse_setuid_binaries"; local IFS="
-"; for cs in ${lse_common_setuid}; do setuidbin=`printf "$setuidbin\n" | grep -Ev "$cs"`;done ; printf "$setuidbin\n"' \
+"; for cs in ${lse_common_setuid}; do setuidbin=`printf "$setuidbin\n" | grep -Ev "^$cs$"`;done ; printf "$setuidbin\n"' \
     "fst010"
 
   #can we write to any setuid binary
