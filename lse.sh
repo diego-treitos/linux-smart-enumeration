@@ -235,6 +235,7 @@ lse_proc_time=60
 lse_level=0 #Valid levels 0:default, 1:interesting, 2:all
 lse_selection="" #Selected tests to run. Empty means all.
 lse_find_opts='-path /proc -prune -o -path /sys -prune -o -path /dev -prune -o' #paths to exclude from searches
+lse_grep_opts='--color=always'
 #)
 
 #( Lib
@@ -523,17 +524,17 @@ lse_run_tests_users() {
   #user in an administrative group
   lse_test "usr010" "1" \
     "Is current user in an administrative group?" \
-    'grep -E "^(adm|admin|root|sudo|wheel)" /etc/group | grep -E "(:|,)$lse_user"'
+    'grep $lse_grep_opts -E "^(adm|admin|root|sudo|wheel)" /etc/group | grep $lse_grep_opts -E "(:|,)$lse_user"'
 
   #other users in an administrative group
   lse_test "usr020" "1" \
     "Are there other users in an administrative groups?" \
-    'grep -E "^(adm|admin|root|sudo|wheel)" /etc/group | grep -Ev ":$"'
+    'grep $lse_grep_opts -E "^(adm|admin|root|sudo|wheel)" /etc/group | grep -Ev ":$" | grep $lse_grep_opts -Ei ":[a-z_-]+\$"'
 
   #other users with shell
   lse_test "usr030" "1" \
     "Other users with shell" \
-    'grep -E "sh\$" /etc/passwd' \
+    'grep $lse_grep_opts -E ":/[a-z/]+sh\$" /etc/passwd' \
     "" \
     "lse_shell_users"
     
@@ -696,7 +697,7 @@ lse_run_tests_filesystem() {
   #looking for credentials in /etc/fstab and /etc/mtab
   lse_test "fst120" "0" \
     "Are there any credentials in fstab/mtab?" \
-    'grep -E "(user|username|login|pass|password|pw|credentials)[=:]" /etc/fstab /etc/mtab'
+    'grep $lse_grep_opts -E "(user|username|login|pass|password|pw|credentials)[=:]" /etc/fstab /etc/mtab'
 
   #check if current user has mail
   lse_test "fst130" "1" \
@@ -902,7 +903,7 @@ lse_run_tests_recurrent_tasks() {
   #can we write to executable paths present in cron tasks?
   lse_test "ret060" "0" \
     "Can we write to executable paths present in cron jobs" \
-    'for uwcp in $lse_user_writable_cron_paths; do [ -w "$uwcp" ] && [ -x "$uwcp" ] && grep -R "$uwcp" /etc/crontab /etc/cron.d/ /etc/anacrontab ; done' \
+    'for uwcp in $lse_user_writable_cron_paths; do [ -w "$uwcp" ] && [ -x "$uwcp" ] && grep $lse_grep_opts -R "$uwcp" /etc/crontab /etc/cron.d/ /etc/anacrontab ; done' \
     "ret050"
 
   #list cron files
@@ -1190,7 +1191,7 @@ lse_run_tests_containers() {
   #is user a member of any lxd/lxc group
   lse_test "ctn210" "0" \
     "Is the user a member of any lxc/lxd group?" \
-    'groups | grep "lxc\|lxd"'
+    'groups | grep $lse_grep_opts "lxc\|lxd"'
 }
 
 
@@ -1255,7 +1256,7 @@ lse_run_tests_processes() {
 #( Main
 while getopts "hcil:e:p:s:" option; do
   case "${option}" in
-    c) lse_color=false;;
+    c) lse_color=false; lse_grep_opts='--color=never';;
     e) lse_exclude_paths "${OPTARG}";;
     i) lse_interactive=false;;
     l) lse_set_level "${OPTARG}";;
