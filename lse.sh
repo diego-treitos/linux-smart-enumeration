@@ -739,6 +739,11 @@ lse_run_tests_filesystem() {
     "Can we read any backup?" \
     'find / $lse_find_opts -path /usr/lib -prune -o -path /usr/share -prune -o -regextype egrep -iregex ".*(backup|dump|cop(y|ies)|bak|bkp)[^/]*\.(sql|tgz|tar|zip)?\.?(gz|xz|bzip2|bz2|lz|7z)?" -readable -type f -exec ls -al {} \;'
 
+  #are there possible credentials in any shell history files
+  lse_test "fst200" "0" \
+    "Are there possible credentials in any shell history file?" \
+    'for h in .bash_history .history .histfile .zhistory; do [ -f "$lse_home/$h" ] && grep $lse_grep_opts -Ei "(user|username|login|pass|password|pw|credentials)[=: ][a-z0-9]+" "$lse_home/$h"; done'
+
   #files owned by user
   lse_test "fst500" "2" \
     "Files owned by user '$lse_user'" \
