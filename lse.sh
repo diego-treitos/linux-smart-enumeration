@@ -1094,7 +1094,7 @@ lse_run_tests_software() {
   #check if there are credentials stored in .mysql-history
   lse_test "sof015" "0" \
     "Are there credentials in mysql_history file?" \
-    'grep -Ei "(pass|identified by)" "$lse_home/.mysql_history"'
+    'grep -Ei "(pass|identified by|md5\()" "$lse_home/.mysql_history"'
 
   #checks to see if we can connect to postgres templates without password
   lse_test "sof020" "0" \
