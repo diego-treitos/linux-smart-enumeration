@@ -802,7 +802,7 @@ lse_run_tests_system() {
   #can root log in via SSH
   lse_test "sys050" "1" \
     "Can root user log in via SSH?" \
-    'grep -E "^[[:space:]]*PermitRootLogin " /etc/ssh/sshd_config | grep -E "(yes|without-password)"'
+    'grep -E "^[[:space:]]*PermitRootLogin " /etc/ssh/sshd_config | grep -E "(yes|without-password|prohibit-password)"'
     
   #list available shells
   lse_test "sys060" "2" \
