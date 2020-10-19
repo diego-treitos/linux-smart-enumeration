@@ -299,6 +299,8 @@ lse_help() {
   echo "               to do faster scans at the cost of completeness"
   echo "  -p SECONDS   Time that the process monitor will spend watching for"
   echo "               processes. A value of 0 will disable any watch (default: 60)"
+  echo "  -S           Serve the lse.sh script in this host so it can be retrieved"
+  echo "               from a remote host."
 }
 lse_ask() {
   local question="$1"
@@ -443,6 +445,41 @@ lse_show_info() {
 	fi
   cecho "${lblue}Architecture:${reset} $lse_arch\n"
   echo
+}
+lse_serve() {
+  # get port
+  which nc >/dev/null || lse_error "Could not find 'nc' netcat binary."
+
+  local_ips="`ip a | grep -Eo 'inet ([0-9]{1,3}\.){3}[0-9]{1,3}' | cut -d' ' -f2`"
+
+  # Get a valid and non used port
+  port=`od -An -N2 -i /dev/random|grep -Eo '[0-9]+'`
+  port_valid=true
+  while true; do
+    for ip in $local_ips; do
+      nc -z "$ip" "$port" && port_valid=false
+    done
+    if [ $((port)) -lt 1024 ] || [ $((port)) -gt 65500 ]; then
+      port_valid=false
+    fi
+    $port_valid && break
+    port=`od -An -N2 -i /dev/random|grep -Eo '[0-9]+'`
+  done
+
+  echo
+  cecho " Serving ${white}Linux Smart Enumeration${reset} on port ${blue}$port${reset}.\n"
+  echo
+  cecho " Depending on your IP and available tools, some of these commands should download it in a remote host:\n"
+  for ip in $local_ips; do
+    [ "$ip" = "127.0.0.1" ] && continue
+    echo
+    cecho "${reset} [${blue}$ip${reset}]\n"
+    cecho "${green}   * ${white}nc ${reset}              $ip $port   > lse.sh </dev/null; chmod 755 lse.sh\n"
+    cecho "${green}   * ${white}curl ${reset}--http0.9  '$ip:$port' -o lse.sh; chmod 755 lse.sh\n"
+    cecho "${green}   * ${white}wget ${reset}           '$ip:$port' -O lse.sh; chmod 755 lse.sh\n"
+    cecho "${green}   * ${white}exec 3<>/dev/tcp/${reset}$ip/$port;printf '\\\\n'>&3;cat<&3>lse.sh;exec 3<&-;chmod 755 lse.sh\n"
+  done
+  nc -l -q0 -p "$port" < "$0" >/dev/null
 }
 lse_header() {
   local id="$1"
@@ -1259,7 +1296,7 @@ lse_run_tests_processes() {
 ##)
 
 #( Main
-while getopts "hcil:e:p:s:" option; do
+while getopts "hcil:e:p:s:S" option; do
   case "${option}" in
     c) lse_color=false; lse_grep_opts='--color=never';;
     e) lse_exclude_paths "${OPTARG}";;
@@ -1267,6 +1304,7 @@ while getopts "hcil:e:p:s:" option; do
     l) lse_set_level "${OPTARG}";;
     s) lse_selection="`printf \"%s\" \"${OPTARG}\"|sed 's/,/ /g'`";;
     p) lse_proc_time="${OPTARG}";;
+    S) lse_serve; exit $?;;
     h) lse_help; exit 0;;
     *) lse_help; exit 1;;
   esac
