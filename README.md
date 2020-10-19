@@ -6,6 +6,8 @@ First, a couple of useful oneliners ;)
 
 `curl "https://github.com/diego-treitos/linux-smart-enumeration/raw/master/lse.sh" -Lo lse.sh;chmod 700 lse.sh`
 
+Note that since version `2.10` you can *serve the script* to other hosts with the `-S` flag!
+
 # linux-smart-enumeration
 Linux enumeration tools for pentesting and CTFs
 
@@ -16,7 +18,7 @@ Unlike LinEnum, `lse` tries to gradualy expose the information depending on its 
 
 ## What is it?
 
-This shell script will show relevant information about the security of the local Linux system.
+This shell script will show relevant information about the security of the local Linux system, helping to escalate privileges.
 
 From version **2.0** it is *mostly* **POSIX** compliant and tested with `shellcheck` and `posh`.
 
@@ -72,6 +74,8 @@ Use: ./lse.sh [options]
                to do faster scans at the cost of completeness
   -p SECONDS   Time that the process monitor will spend watching for
                processes. A value of 0 will disable any watch (default: 60)
+  -S           Serve the lse.sh script in this host so it can be retrieved
+               from a remote host.
 ```
 ## Is it pretty?
 
