@@ -902,6 +902,11 @@ lse_run_tests_security() {
     "Does current user have capabilities?" \
     'printf "$lse_user_caps\n" | grep "$lse_user"' \
     "sec040"
+  
+  #can user read the auditd log
+  lse_test "sec060" "0" \
+    "Can we read the auditd log?" \
+    'al=/var/log/audit/audit.log; test -r "$al" && echo "tail $al:" && echo && tail "$al"'
 }
 
 
