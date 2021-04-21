@@ -230,6 +230,7 @@ lse_critical_writable_dirs="
 
 #( Options
 lse_color=true
+lse_alt_color=false
 lse_interactive=true
 lse_proc_time=60
 lse_level=0 #Valid levels 0:default, 1:interesting, 2:all
@@ -246,6 +247,21 @@ cecho() {
     # If color is disabled we remove it
     printf "%b" "$@" | sed 's/\x1B\[[0-9;]\+[A-Za-z]//g'
   fi
+}
+lse_recolor() {
+  o_white="$white"
+  o_lyellow="$lyellow"
+  o_grey="$grey"
+  o_lred="$lred"
+  o_lgreen="$lgreen"
+  o_lcyan="$lcyan"
+
+  white="$o_grey"
+  lyellow="$o_lred"
+  grey="$lgrey"
+  lred="$red"
+  lgreen="$b_lgreen$black"
+  lcyan="$cyan"
 }
 lse_error() {
   cecho "${red}ERROR: ${reset}$*\n" >&2
@@ -275,6 +291,7 @@ lse_help() {
   echo
   echo " OPTIONS"
   echo "  -c           Disable color"
+  echo "  -C           Use alternative color scheme"
   echo "  -i           Non interactive mode"
   echo "  -h           This help"
   echo "  -l LEVEL     Output verbosity level"
@@ -408,7 +425,7 @@ lse_test() {
   fi
 
   if [ -z "$output" ]; then
-    cecho "${grey} nope${reset}\n"
+    cecho " ${grey}nope${reset}\n"
     return 1
   else
     lse_passed_tests="$lse_passed_tests $id"
@@ -1301,9 +1318,10 @@ lse_run_tests_processes() {
 ##)
 
 #( Main
-while getopts "hcil:e:p:s:S" option; do
+while getopts "hcCil:e:p:s:S" option; do
   case "${option}" in
     c) lse_color=false; lse_grep_opts='--color=never';;
+    C) lse_alt_color=true;;
     e) lse_exclude_paths "${OPTARG}";;
     i) lse_interactive=false;;
     l) lse_set_level "${OPTARG}";;
@@ -1317,6 +1335,9 @@ done
 
 #trap to exec on SIGINT
 trap "lse_exit 1" 2
+
+# use alternative color scheme
+$lse_alt_color && lse_recolor
 
 lse_request_information
 lse_show_info
