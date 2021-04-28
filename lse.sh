@@ -583,7 +583,7 @@ lse_run_tests_users() {
   #other users in an administrative group
   lse_test "usr020" "1" \
     "Are there other users in administrative groups?" \
-    'grep $lse_grep_opts -E "^(adm|admin|root|sudo|wheel)" /etc/group | grep -Ev ":$" | grep $lse_grep_opts -Ei ":[a-z_-]+\$"'
+    'grep $lse_grep_opts -E "^(adm|admin|root|sudo|wheel)" /etc/group | grep -Ev ":$|:$lse_user$" | grep $lse_grep_opts -Ei ":[,a-z_-]+\$"'
 
   #other users with shell
   lse_test "usr030" "1" \
