@@ -960,7 +960,7 @@ lse_run_tests_recurrent_tasks() {
   #can we write to any paths present in cron tasks?
   lse_test "ret050" "1" \
     "Can we write to any paths present in cron jobs" \
-    'for p in `grep --color=never -hERoi "/[a-z0-9_/\.\-]+" /etc/cron* | sort -u`; do [ -w "$p" ] && echo "$p"; done' \
+    'for p in `grep --color=never -hERoi "/[a-z0-9_/\.\-]+" /etc/cron* | grep -Ev "/dev/(null|zero|random|urandom)" | sort -u`; do [ -w "$p" ] && echo "$p"; done' \
     "" \
     "lse_user_writable_cron_paths"
 
