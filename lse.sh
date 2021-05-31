@@ -1187,7 +1187,7 @@ lse_run_tests_software() {
   #check if there are ssh private keys in ssh-agent
   lse_test "sof050" "0" \
     "Are there private keys in ssh-agent?" \
-    'ssh-add -l'
+    'ssh-add -l | grep -iv "agent has no identities"'
 
   #check if there are gpg keys in gpg-agent
   lse_test "sof060" "0" \
