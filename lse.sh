@@ -980,7 +980,7 @@ lse_run_tests_recurrent_tasks() {
   #user timers
   lse_test "ret500" "1" \
     "User systemd timers" \
-    'systemctl --user list-timers --all | grep -Ev "(^$|timers listed)"'
+    'systemctl --user list-timers --all | grep -iq "\.timer" && systemctl --user list-timers --all'
 
   #can we write in any system timer?
   lse_test "ret510" "0" \
