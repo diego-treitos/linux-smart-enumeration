@@ -4,7 +4,7 @@
 
 # Author: Diego Blanco <diego.blanco@treitos.com>
 # GitHub: https://github.com/diego-treitos/linux-smart-enumeration
-# 
+#
 lse_version="3.2"
 
 #( Colors
@@ -287,7 +287,7 @@ lse_set_level() {
   esac
 }
 lse_help() {
-  echo "Use: $0 [options]" 
+  echo "Use: $0 [options]"
   echo
   echo " OPTIONS"
   echo "  -c           Disable color"
@@ -404,7 +404,7 @@ lse_test() {
       cecho "${red}---$reset\n"
     fi
     return 1
-  fi 
+  fi
 
   # If level is 2 and lse_level is less than 2, then we do not execute
   # level 2 tests unless their output needs to be assigned to a variable
@@ -534,7 +534,7 @@ lse_exit() {
 }
 lse_procmon() {
   # monitor processes
-  #NOTE: The first number will be the number of occurrences of a process due to 
+  #NOTE: The first number will be the number of occurrences of a process due to
   #      uniq -c
   while [ -f "$lse_procmon_lock" ]; do
     ps -ewwwo start_time,pid,user:50,args
@@ -564,7 +564,7 @@ lse_proc_print() {
 #  A successful test will receive some output while a failed tests will receive
 # an empty string.
 #
-########################################################################( users 
+########################################################################( users
 lse_run_tests_users() {
   lse_header "usr" "users"
 
@@ -582,8 +582,8 @@ lse_run_tests_users() {
 
   #other users in an administrative group
   lse_test "usr020" "1" \
-    "Are there other users in an administrative groups?" \
-    'grep $lse_grep_opts -E "^(adm|admin|root|sudo|wheel)" /etc/group | grep -Ev ":$" | grep $lse_grep_opts -Ei ":[a-z_-]+\$"'
+    "Are there other users in administrative groups?" \
+    'grep $lse_grep_opts -E "^(adm|admin|root|sudo|wheel)" /etc/group | grep -Ev ":$|:$lse_user$" | grep $lse_grep_opts -Ei ":[,a-z_-]+\$"'
 
   #other users with shell
   lse_test "usr030" "1" \
@@ -591,7 +591,7 @@ lse_run_tests_users() {
     'grep $lse_grep_opts -E ":/[a-z/]+sh\$" /etc/passwd' \
     "" \
     "lse_shell_users"
-    
+
   #user env information
   lse_test "usr040" "2" \
     "Environment information" \
@@ -722,7 +722,7 @@ lse_run_tests_filesystem() {
     "Can we write to any setgid binary?" \
     'for b in $lse_setgid_binaries; do [ -x "$b" ] && [ -w "$b" ] && echo "$b" ;done' \
     "fst040"
-    
+
   #can we read /root
   lse_test "fst070" "1" \
     "Can we read /root?" \
@@ -863,7 +863,7 @@ lse_run_tests_system() {
   lse_test "sys050" "1" \
     "Can root user log in via SSH?" \
     'grep -E "^[[:space:]]*PermitRootLogin " /etc/ssh/sshd_config | grep -E "(yes|without-password|prohibit-password)"'
-    
+
   #list available shells
   lse_test "sys060" "2" \
     "List available shells" \
@@ -919,7 +919,7 @@ lse_run_tests_security() {
     "Does current user have capabilities?" \
     'printf "$lse_user_caps\n" | grep "$lse_user"' \
     "sec040"
-  
+
   #can user read the auditd log
   lse_test "sec060" "0" \
     "Can we read the auditd log?" \
@@ -927,7 +927,7 @@ lse_run_tests_security() {
 }
 
 
-##############################################################( recurrent tasks 
+##############################################################( recurrent tasks
 lse_run_tests_recurrent_tasks() {
   lse_header "ret" "recurrent tasks"
 
@@ -960,7 +960,7 @@ lse_run_tests_recurrent_tasks() {
   #can we write to any paths present in cron tasks?
   lse_test "ret050" "1" \
     "Can we write to any paths present in cron jobs" \
-    'for p in `grep --color=never -hERoi "/[a-z0-9_/\.\-]+" /etc/cron* | sort -u`; do [ -w "$p" ] && echo "$p"; done' \
+    'for p in `grep --color=never -hERoi "/[a-z0-9_/\.\-]+" /etc/cron* | grep -Ev "/dev/(null|zero|random|urandom)" | sort -u`; do [ -w "$p" ] && echo "$p"; done' \
     "" \
     "lse_user_writable_cron_paths"
 
@@ -980,7 +980,7 @@ lse_run_tests_recurrent_tasks() {
   #user timers
   lse_test "ret500" "1" \
     "User systemd timers" \
-    'systemctl --user list-timers --all | grep -Ev "(^$|timers listed)"'
+    'systemctl --user list-timers --all | grep -iq "\.timer" && systemctl --user list-timers --all'
 
   #can we write in any system timer?
   lse_test "ret510" "0" \
@@ -1026,7 +1026,7 @@ lse_run_tests_network() {
 
   #nameservers
   lse_test "net530" "2" \
-    "Namerservers" \
+    "Nameservers" \
     'grep "nameserver" /etc/resolv.conf'
 
   #systemd nameservers
@@ -1038,7 +1038,7 @@ lse_run_tests_network() {
   lse_test "net550" "2" \
     "Listening TCP" \
     'netstat -tnlp || ss -tnlp'
-  
+
   #listening UDP
   lse_test "net560" "2" \
     "Listening UDP" \
@@ -1187,7 +1187,7 @@ lse_run_tests_software() {
   #check if there are ssh private keys in ssh-agent
   lse_test "sof050" "0" \
     "Are there private keys in ssh-agent?" \
-    'ssh-add -l'
+    'ssh-add -l | grep -iv "agent has no identities"'
 
   #check if there are gpg keys in gpg-agent
   lse_test "sof060" "0" \
