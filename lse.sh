@@ -798,6 +798,16 @@ lse_run_tests_filesystem() {
     "Are there possible credentials in any shell history file?" \
     'for h in .bash_history .history .histfile .zhistory; do [ -f "$lse_home/$h" ] && grep $lse_grep_opts -Ei "(user|username|login|pass|password|pw|credentials)[=: ][a-z0-9]+" "$lse_home/$h"; done'
 
+  #nfs exports with no_root_squash
+  lse_test "fst210" "0" \
+    "Are there NFS exports with 'no_root_squash' option?" \
+    'grep $lse_grep_opts "no_root_squash" /etc/exports'
+
+  #nfs exports with no_all_squash
+  lse_test "fst220" "1" \
+    "Are there NFS exports with 'no_all_squash' option?" \
+    'grep $lse_grep_opts "no_all_squash" /etc/exports'
+
   #files owned by user
   lse_test "fst500" "2" \
     "Files owned by user '$lse_user'" \
