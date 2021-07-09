@@ -816,7 +816,7 @@ lse_run_tests_filesystem() {
   #list nfs shares
   lse_test "fst530" "2" \
     "List NFS server shares" \
-    'ls -la /etc/exports; cat /etc/exports'
+    'ls -la /etc/exports 2>/dev/null && cat /etc/exports'
 
   #dump fstab
   lse_test "fst540" "2" \
