@@ -557,6 +557,23 @@ lse_proc_print() {
     fi
   done
 }
+lse_get_distro() {
+  # Get the distribution name
+  #
+  # ubuntu, debian, centos, redhat
+  local distro='unknown'
+  if type lsb_release >/dev/null 2>&1; then
+    distro=`lsb_release -is`
+  elif [ -f /etc/os-release ]; then
+    distro=`grep -E '^ID=' /etc/os-release | cut -f2 -d=`
+  elif [ -f /etc/redhat-release ]; then
+    grep -qi "centos"  /etc/redhat-release && distro=centos
+    grep -qi "red hat" /etc/redhat-release && distro=redhat
+  elif [  ]
+  fi
+
+  echo -n "$distro" | tr '[:upper:]' '[:lower:]' | tr -d \"\'
+}
 #)
 
 ########################################################################( TESTS
