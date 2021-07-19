@@ -87,7 +87,7 @@ lse_procmon_data=`mktemp`
 lse_procmon_lock=`mktemp`
 
 # printf
-printf "$reset" | grep -q '\\' && alias printf="env printf"
+printf "%s" "$reset" | grep -q '\\' && alias printf="env printf"
 
 # internal data
 lse_common_setuid="
@@ -126,7 +126,9 @@ lse_common_setuid="
 /usr/bin/newuidmap
 /usr/bin/passwd
 /usr/bin/pkexec
+/usr/bin/pmount
 /usr/bin/procmail
+/usr/bin/pumount
 /usr/bin/staprun
 /usr/bin/su
 /usr/bin/sudo
@@ -148,13 +150,17 @@ lse_common_setuid="
 /usr/lib/xorg/Xorg.wrap
 /usr/libexec/Xorg.wrap
 /usr/libexec/abrt-action-install-debuginfo-to-abrt-cache
+/usr/libexec/cockpit-session
 /usr/libexec/dbus-1/dbus-daemon-launch-helper
 /usr/libexec/gstreamer-1.0/gst-ptp-helper
 /usr/libexec/openssh/ssh-keysign
 /usr/libexec/polkit-1/polkit-agent-helper-1
+/usr/libexec/polkit-agent-helper-1
 /usr/libexec/pt_chown
 /usr/libexec/qemu-bridge-helper
+/usr/libexec/spice-client-glib-usb-acl-helper
 /usr/libexec/spice-gtk-x86_64/spice-client-glib-usb-acl-helper
+/usr/local/share/panasonic/printer/bin/L_H0JDUCZAZ
 /usr/sbin/exim4
 /usr/sbin/grub2-set-bootflag
 /usr/sbin/mount.nfs
