@@ -170,7 +170,7 @@ lse_common_setuid="
 "
 #regex rules for common setuid
 lse_common_setuid="$lse_common_setuid
-/snap/core/.*
+/snap/core.*
 /var/tmp/mkinitramfs.*
 "
 #critical writable files
