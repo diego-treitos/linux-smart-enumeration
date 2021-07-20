@@ -1222,6 +1222,16 @@ lse_run_tests_software() {
     'for f in $lse_user_writable; do test -S "$f" && printf "$f" | grep -a "gpg-agent"; done' \
     "fst000"
 
+  #find keepass database files
+  lse_test "sof090" "0" \
+    "Found any keepass database files?" \
+    'find / $lse_find_opts -regextype egrep -iregex ".*\.kdbx?" -readable -type f -print'
+
+  #find keepass database files
+  lse_test "sof095" "0" \
+    "Found any 'pass' store directories?" \
+    'find / $lse_find_opts -name ".password-store" -readable -type d -print'
+
   #sudo version - check to see if there are any known vulnerabilities with this
   lse_test "sof500" "2" \
     "Sudo version" \
