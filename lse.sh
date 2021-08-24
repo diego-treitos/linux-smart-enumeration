@@ -241,7 +241,7 @@ lse_interactive=true
 lse_proc_time=60
 lse_level=0 #Valid levels 0:default, 1:interesting, 2:all
 lse_selection="" #Selected tests to run. Empty means all.
-lse_find_opts='-path /proc -prune -o -path /sys -prune -o -path /dev -prune -o' #paths to exclude from searches
+lse_find_opts='-path /proc -prune -o -path /sys -prune -o -path /dev -prune -o -path /usr/lib/python\*/dist-packages -prune -o' #paths to exclude from searches
 lse_grep_opts='--color=always'
 #)
 
