@@ -1251,6 +1251,31 @@ lse_run_tests_software() {
   lse_test "sof530" "2" \
     "Apache version" \
     'apache2 -v; httpd -v'
+
+  # Check if tmux installed, if yes, which version. 
+  lse_test "sof535" "0" \
+    "Tmux version"\
+    'tmux -V'
+
+  # TODO if tmux version <3.1c then vulnerable to CVE-2020-27347; if 1.3 or 1.4, vulnerable to CVE-2011-1496
+  
+  # checks if any tmux session is active
+  lse_test "sof540" "0"\
+    "Are any tmux sessions available?"\
+    "tmux list-sessions"
+
+  # Check if screen is installed, if yes, which version
+  lse_test "sof550" "0"\
+    "Screen version"\
+    "screen -v"
+
+  # TODO show list of CVEs avaialable under that version  
+
+  # check if any screen session is active
+  lse_test "sof555" "0"\
+    "Are any screen sessions available?"\
+    "screen -ls"
+
 }
 
 
