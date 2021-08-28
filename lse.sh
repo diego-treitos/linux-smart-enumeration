@@ -1262,11 +1262,21 @@ lse_run_tests_software() {
   # checks if any tmux session is active
   lse_test "sof540" "0"\
     "Are any tmux sessions available?"\
-    "tmux list-sessions"
+    'tmux list-sessions'
+
+  # checks for all tmux sessions in /tmp/ 
+  lse_test "sof541" "1"\
+    "Tmux folders present in /tmp/"\
+    'ls -l /tmp/ | grep -i "tmux*"'
+
+  # checks for all tmux sessions in default location /tmp/tmux-$UID
+  lse_test "sof542" "1"\
+    "Sockets available at /tmp/tmux-$lse_user_id/ ?"\
+    "ls -l /tmp/tmux-$lse_user_id/"
 
   # Check if screen is installed, if yes, which version
   lse_test "sof550" "0"\
-    "Screen version"\
+    "Screen Installed?"\
     "screen -v"
 
   # TODO show list of CVEs avaialable under that version  
@@ -1275,6 +1285,11 @@ lse_run_tests_software() {
   lse_test "sof555" "0"\
     "Are any screen sessions available?"\
     "screen -ls"
+
+  # Check for other users screen sessions
+  lse_test "sof560" "1"\
+    "Sockets available at /run/screen/S-$lse_user/ ?"\
+    "ls -l /run/screen/S-$lse_user"
 
 }
 
