@@ -1227,8 +1227,8 @@ lse_run_tests_software() {
     "Found any keepass database files?" \
     'find / $lse_find_opts -regextype egrep -iregex ".*\.kdbx?" -readable -type f -print'
 
-  #find keepass database files
-  lse_test "sof095" "0" \
+  #find pass database files
+  lse_test "sof100" "0" \
     "Found any 'pass' store directories?" \
     'find / $lse_find_opts -name ".password-store" -readable -type d -print'
 
