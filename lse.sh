@@ -1232,6 +1232,34 @@ lse_run_tests_software() {
     "Found any 'pass' store directories?" \
     'find / $lse_find_opts -name ".password-store" -readable -type d -print'
 
+  # checks if any tmux session is active
+  lse_test "sof110" "0"\
+    "Are any tmux sessions available?"\
+    'tmux list-sessions'
+
+  # checks for all tmux sessions (socket files) in /tmp/ 
+  lse_test "sof120" "1"\
+    "tmux folders present in /tmp/"\
+    'find /tmp -type s -regex "/tmp/tmux-[0-9]+/.+" -exec ls -l {} +'
+  
+  lse_test "sof130" "0"\
+    "writable tmux sockets not belonging to current user"\
+    "find /tmp -writable -type s -regex '/tmp/tmux-[0-9]+/.+' ! -user $lse_user -exec ls -l {} +"
+
+    # check if any screen session is active
+  lse_test "sof140" "0"\
+    "Are any screen sessions available?"\
+    "screen -ls"
+
+  # Check for other users screen sessions
+  lse_test "sof150" "1"\
+    "other user's sockets available at /run/screen/"\
+    "find /run/screen -type s -regex '/run/screen/S-.+/.+' ! -user $lse_user -exec ls -l {} +"
+
+  lse_test "sof160" "0"\
+    "other user's writable sockets available at /run/screen/"\
+    "find /run/screen -type s -writable -regex '/run/screen/S-.+/.+' ! -user $lse_user -exec ls -l {} +"
+
   #sudo version - check to see if there are any known vulnerabilities with this
   lse_test "sof500" "2" \
     "Sudo version" \
@@ -1253,43 +1281,14 @@ lse_run_tests_software() {
     'apache2 -v; httpd -v'
 
   # Check if tmux installed, if yes, which version. 
-  lse_test "sof535" "0" \
+  lse_test "sof540" "2" \
     "Tmux version"\
     'tmux -V'
 
-  # TODO if tmux version <3.1c then vulnerable to CVE-2020-27347; if 1.3 or 1.4, vulnerable to CVE-2011-1496
-  
-  # checks if any tmux session is active
-  lse_test "sof540" "0"\
-    "Are any tmux sessions available?"\
-    'tmux list-sessions'
-
-  # checks for all tmux sessions in /tmp/ 
-  lse_test "sof541" "1"\
-    "Tmux folders present in /tmp/"\
-    'ls -l /tmp/ | grep -i "tmux*"'
-
-  # checks for all tmux sessions in default location /tmp/tmux-$UID
-  lse_test "sof542" "1"\
-    "Sockets available at /tmp/tmux-$lse_user_id/ ?"\
-    "ls -l /tmp/tmux-$lse_user_id/"
-
   # Check if screen is installed, if yes, which version
-  lse_test "sof550" "0"\
-    "Screen Installed?"\
+  lse_test "sof550" "2"\
+    "Screen installed?"\
     "screen -v"
-
-  # TODO show list of CVEs avaialable under that version  
-
-  # check if any screen session is active
-  lse_test "sof555" "0"\
-    "Are any screen sessions available?"\
-    "screen -ls"
-
-  # Check for other users screen sessions
-  lse_test "sof560" "1"\
-    "Sockets available at /run/screen/S-$lse_user/ ?"\
-    "ls -l /run/screen/S-$lse_user"
 
 }
 
