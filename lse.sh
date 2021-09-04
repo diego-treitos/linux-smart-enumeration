@@ -1232,33 +1232,35 @@ lse_run_tests_software() {
     "Found any 'pass' store directories?" \
     'find / $lse_find_opts -name ".password-store" -readable -type d -print'
 
-  # checks if any tmux session is active
-  lse_test "sof110" "0"\
-    "Are any tmux sessions available?"\
+  #check if any tmux session is active
+  lse_test "sof110" "0" \
+    "Are there any tmux sessions available?" \
     'tmux list-sessions'
 
-  # checks for all tmux sessions (socket files) in /tmp/ 
-  lse_test "sof120" "1"\
-    "tmux folders present in /tmp/"\
+  #check for all tmux sessions for other users
+  lse_test "sof120" "1" \
+    "Are there any tmux sessions from other users?" \
     'find /tmp -type s -regex "/tmp/tmux-[0-9]+/.+" -exec ls -l {} +'
-  
-  lse_test "sof130" "0"\
-    "writable tmux sockets not belonging to current user"\
-    "find /tmp -writable -type s -regex '/tmp/tmux-[0-9]+/.+' ! -user $lse_user -exec ls -l {} +"
 
-    # check if any screen session is active
-  lse_test "sof140" "0"\
-    "Are any screen sessions available?"\
-    "screen -ls"
+  #check if we have write access to other users tmux sessions
+  lse_test "sof130" "0" \
+    "Can we write to tmux session sockets from other users?" \
+    'find /tmp -writable -type s -regex "/tmp/tmux-[0-9]+/.+" ! -user $lse_user -exec ls -l {} +'
 
-  # Check for other users screen sessions
-  lse_test "sof150" "1"\
-    "other user's sockets available at /run/screen/"\
-    "find /run/screen -type s -regex '/run/screen/S-.+/.+' ! -user $lse_user -exec ls -l {} +"
+  #check if there is any active screen session
+  lse_test "sof140" "0" \
+    "Are any screen sessions available?" \
+    'screen -ls'
 
-  lse_test "sof160" "0"\
-    "other user's writable sockets available at /run/screen/"\
-    "find /run/screen -type s -writable -regex '/run/screen/S-.+/.+' ! -user $lse_user -exec ls -l {} +"
+  #find other users screen sessions
+  lse_test "sof150" "1" \
+    "Are there any screen sessions from other users?" \
+    'find /run/screen -type s -regex "/run/screen/S-.+/.+" ! -user $lse_user -exec ls -l {} +'
+
+  #find writable screen session sockets from other users
+  lse_test "sof160" "0" \
+    "Can we write to screen session sockets from other users?" \
+    'find /run/screen -type s -writable -regex "/run/screen/S-.+/.+" ! -user $lse_user -exec ls -l {} +'
 
   #sudo version - check to see if there are any known vulnerabilities with this
   lse_test "sof500" "2" \
@@ -1280,15 +1282,15 @@ lse_run_tests_software() {
     "Apache version" \
     'apache2 -v; httpd -v'
 
-  # Check if tmux installed, if yes, which version. 
+  #check tmux version
   lse_test "sof540" "2" \
-    "Tmux version"\
+    "Tmux version" \
     'tmux -V'
 
-  # Check if screen is installed, if yes, which version
-  lse_test "sof550" "2"\
-    "Screen installed?"\
-    "screen -v"
+  #check screen version
+  lse_test "sof550" "2" \
+    "Screen version" \
+    'screen -v'
 
 }
 
