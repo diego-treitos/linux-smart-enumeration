@@ -1250,7 +1250,7 @@ lse_run_tests_software() {
   #check if there is any active screen session
   lse_test "sof140" "0" \
     "Are any screen sessions available?" \
-    'screen -ls'
+    'screen -ls >/dev/null && screen -ls'
 
   #find other users screen sessions
   lse_test "sof150" "1" \
