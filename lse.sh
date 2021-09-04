@@ -1255,7 +1255,7 @@ lse_run_tests_software() {
   #find other users screen sessions
   lse_test "sof150" "1" \
     "Are there any screen sessions from other users?" \
-    'find /run/screen -type s -regex "/run/screen/S-.+/.+" ! -user $lse_user -exec ls -l {} +'
+    'find /run/screen -type d -regex "/run/screen/S-.+" ! -user $lse_user'
 
   #find writable screen session sockets from other users
   lse_test "sof160" "0" \
