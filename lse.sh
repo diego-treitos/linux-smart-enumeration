@@ -1240,7 +1240,7 @@ lse_run_tests_software() {
   #check for all tmux sessions for other users
   lse_test "sof120" "1" \
     "Are there any tmux sessions from other users?" \
-    'find /tmp -type s -regex "/tmp/tmux-[0-9]+/.+" -exec ls -l {} +'
+    'find /tmp -type d -regex "/tmp/tmux-[0-9]+" ! -user $lse_user'
 
   #check if we have write access to other users tmux sessions
   lse_test "sof130" "0" \
