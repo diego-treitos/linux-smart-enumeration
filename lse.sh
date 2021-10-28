@@ -5,7 +5,7 @@
 # Author: Diego Blanco <diego.blanco@treitos.com>
 # GitHub: https://github.com/diego-treitos/linux-smart-enumeration
 #
-lse_version="3.4"
+lse_version="3.7"
 
 #( Colors
 #
@@ -59,6 +59,179 @@ underline_off='\e[24m'
 inverse_off='\e[27m'
 conceil_off='\e[28m'
 crossedout_off='\e[29m'
+#)
+
+#( Globals
+#
+# user
+lse_user_id="$UID"
+[ -z "$lse_user_id" ] && lse_user_id="`id -u`"
+lse_user="$USER"
+[ -z "$lse_user" ] && lse_user="`id -nu`"
+lse_pass=""
+lse_home="$HOME"
+[ -z "$lse_home" ] && lse_home="`(grep -E "^$lse_user:" /etc/passwd | cut -d: -f6)2>/dev/null`"
+
+# system
+lse_arch="`uname -m`"
+lse_linux="`uname -r`"
+lse_hostname="`hostname`"
+lse_distro=`command -v lsb_release >/dev/null 2>&1 && lsb_release -d | sed 's/Description:\s*//' 2>/dev/null`
+[ -z "$lse_distro" ] && lse_distro="`(source /etc/os-release && echo "$PRETTY_NAME")2>/dev/null`"
+
+# lse
+lse_passed_tests=""
+lse_executed_tests=""
+lse_DEBUG=false
+lse_procmon_data=`mktemp`
+lse_procmon_lock=`mktemp`
+
+# printf
+printf "%s" "$reset" | grep -q '\\' && alias printf="env printf"
+
+# internal data
+lse_common_setuid="
+/bin/fusermount
+/bin/mount
+/bin/ntfs-3g
+/bin/ping
+/bin/ping6
+/bin/su
+/bin/umount
+/lib64/dbus-1/dbus-daemon-launch-helper
+/sbin/mount.ecryptfs_private
+/sbin/mount.nfs
+/sbin/pam_timestamp_check
+/sbin/pccardctl
+/sbin/unix2_chkpwd
+/sbin/unix_chkpwd
+/usr/bin/Xorg
+/usr/bin/arping
+/usr/bin/at
+/usr/bin/beep
+/usr/bin/chage
+/usr/bin/chfn
+/usr/bin/chsh
+/usr/bin/crontab
+/usr/bin/expiry
+/usr/bin/firejail
+/usr/bin/fusermount
+/usr/bin/fusermount-glusterfs
+/usr/bin/gpasswd
+/usr/bin/kismet_capture
+/usr/bin/mount
+/usr/bin/mtr
+/usr/bin/newgidmap
+/usr/bin/newgrp
+/usr/bin/newuidmap
+/usr/bin/passwd
+/usr/bin/pkexec
+/usr/bin/pmount
+/usr/bin/procmail
+/usr/bin/pumount
+/usr/bin/staprun
+/usr/bin/su
+/usr/bin/sudo
+/usr/bin/sudoedit
+/usr/bin/traceroute6.iputils
+/usr/bin/umount
+/usr/bin/weston-launch
+/usr/lib/chromium-browser/chrome-sandbox
+/usr/lib/dbus-1.0/dbus-daemon-launch-helper
+/usr/lib/dbus-1/dbus-daemon-launch-helper
+/usr/lib/eject/dmcrypt-get-device
+/usr/lib/openssh/ssh-keysign
+/usr/lib/policykit-1/polkit-agent-helper-1
+/usr/lib/polkit-1/polkit-agent-helper-1
+/usr/lib/pt_chown
+/usr/lib/snapd/snap-confine
+/usr/lib/spice-gtk/spice-client-glib-usb-acl-helper
+/usr/lib/x86_64-linux-gnu/lxc/lxc-user-nic
+/usr/lib/xorg/Xorg.wrap
+/usr/libexec/Xorg.wrap
+/usr/libexec/abrt-action-install-debuginfo-to-abrt-cache
+/usr/libexec/cockpit-session
+/usr/libexec/dbus-1/dbus-daemon-launch-helper
+/usr/libexec/gstreamer-1.0/gst-ptp-helper
+/usr/libexec/openssh/ssh-keysign
+/usr/libexec/polkit-1/polkit-agent-helper-1
+/usr/libexec/polkit-agent-helper-1
+/usr/libexec/pt_chown
+/usr/libexec/qemu-bridge-helper
+/usr/libexec/spice-client-glib-usb-acl-helper
+/usr/libexec/spice-gtk-x86_64/spice-client-glib-usb-acl-helper
+/usr/local/share/panasonic/printer/bin/L_H0JDUCZAZ
+/usr/sbin/exim4
+/usr/sbin/grub2-set-bootflag
+/usr/sbin/mount.nfs
+/usr/sbin/mtr-packet
+/usr/sbin/pam_timestamp_check
+/usr/sbin/pppd
+/usr/sbin/pppoe-wrapper
+/usr/sbin/suexec
+/usr/sbin/unix_chkpwd
+/usr/sbin/userhelper
+/usr/sbin/usernetctl
+/usr/sbin/uuidd
+"
+#regex rules for common setuid
+lse_common_setuid="$lse_common_setuid
+/snap/core.*
+/var/tmp/mkinitramfs.*
+"
+#critical writable files
+lse_critical_writable="
+/etc/apache2/apache2.conf
+/etc/apache2/httpd.conf
+/etc/bash.bashrc
+/etc/bash_completion
+/etc/bash_completion.d/*
+/etc/environment
+/etc/environment.d/*
+/etc/hosts.allow
+/etc/hosts.deny
+/etc/httpd/conf/httpd.conf
+/etc/httpd/httpd.conf
+/etc/incron.conf
+/etc/incron.d/*
+/etc/logrotate.d/*
+/etc/modprobe.d/*
+/etc/pam.d/*
+/etc/passwd
+/etc/php*/fpm/pool.d/*
+/etc/php/*/fpm/pool.d/*
+/etc/profile
+/etc/profile.d/*
+/etc/rc*.d/*
+/etc/rsyslog.d/*
+/etc/shadow
+/etc/skel/*
+/etc/sudoers
+/etc/sudoers.d/*
+/etc/supervisor/conf.d/*
+/etc/supervisor/supervisord.conf
+/etc/sysctl.conf
+/etc/sysctl.d/*
+/etc/uwsgi/apps-enabled/*
+/root/.ssh/authorized_keys
+"
+#critical writable directories
+lse_critical_writable_dirs="
+/etc/bash_completion.d
+/etc/cron.d
+/etc/cron.daily
+/etc/cron.hourly
+/etc/cron.weekly
+/etc/environment.d
+/etc/logrotate.d
+/etc/modprobe.d
+/etc/pam.d
+/etc/profile.d
+/etc/rsyslog.d/
+/etc/sudoers.d/
+/etc/sysctl.d
+/root
+"
 #)
 
 #( Options
@@ -290,7 +463,9 @@ lse_show_info() {
   echo
   cecho "${lblue}    Hostname:${reset} $lse_hostname\n"
   cecho "${lblue}       Linux:${reset} $lse_linux\n"
+	if [ "$lse_distro" ]; then
   cecho "${lblue}Distribution:${reset} $lse_distro\n"
+	fi
   cecho "${lblue}Architecture:${reset} $lse_arch\n"
   echo
 }
@@ -417,182 +592,6 @@ lse_get_pkg_version() {
   #TODO: Combine lse_is_version_bigger and this one to directly compare packages: lse_compare_version "sudo". This would retrieve the package version for "sudo" for this distro and look for the vulnerable version in another CSV formated variable.
 }
 #)
-
-#( Globals
-#
-# user
-lse_user_id="$UID"
-[ -z "$lse_user_id" ] && lse_user_id="`id -u`"
-lse_user="$USER"
-[ -z "$lse_user" ] && lse_user="`id -nu`"
-lse_pass=""
-lse_home="$HOME"
-[ -z "$lse_home" ] && lse_home="`(grep -E "^$lse_user:" /etc/passwd | cut -d: -f6)2>/dev/null`"
-
-# system
-lse_arch="`uname -m`"
-lse_linux="`uname -r`"
-lse_hostname="`hostname`"
-lse_distro="`lse_get_distro`"
-
-# lse
-lse_passed_tests=""
-lse_executed_tests=""
-lse_DEBUG=false
-lse_procmon_data=`mktemp`
-lse_procmon_lock=`mktemp`
-
-# printf
-printf "$reset" | grep -q '\\' && alias printf="env printf"
-
-# cve packages:
-#    cve_id, distro, distro_pkg_name, first_vuln_pkg_version, fixed_pkg_version
-lse_cve_packages="
-CVE-2016-5195,centos,sudo,
-CVE-2016-5195,debian,sudo,
-CVE-2016-5195,fedora,sudo,
-CVE-2016-5195,opsuse,sudo,
-CVE-2016-5195,redhat,sudo,
-CVE-2016-5195,ubuntu,sudo,
-"
-
-# internal data
-lse_common_setuid="
-/bin/fusermount
-/bin/mount
-/bin/ntfs-3g
-/bin/ping
-/bin/ping6
-/bin/su
-/bin/umount
-/lib64/dbus-1/dbus-daemon-launch-helper
-/sbin/mount.ecryptfs_private
-/sbin/mount.nfs
-/sbin/pam_timestamp_check
-/sbin/pccardctl
-/sbin/unix2_chkpwd
-/sbin/unix_chkpwd
-/usr/bin/Xorg
-/usr/bin/arping
-/usr/bin/at
-/usr/bin/beep
-/usr/bin/chage
-/usr/bin/chfn
-/usr/bin/chsh
-/usr/bin/crontab
-/usr/bin/expiry
-/usr/bin/firejail
-/usr/bin/fusermount
-/usr/bin/fusermount-glusterfs
-/usr/bin/gpasswd
-/usr/bin/kismet_capture
-/usr/bin/mount
-/usr/bin/mtr
-/usr/bin/newgidmap
-/usr/bin/newgrp
-/usr/bin/newuidmap
-/usr/bin/passwd
-/usr/bin/pkexec
-/usr/bin/procmail
-/usr/bin/staprun
-/usr/bin/su
-/usr/bin/sudo
-/usr/bin/sudoedit
-/usr/bin/traceroute6.iputils
-/usr/bin/umount
-/usr/bin/weston-launch
-/usr/lib/chromium-browser/chrome-sandbox
-/usr/lib/dbus-1.0/dbus-daemon-launch-helper
-/usr/lib/dbus-1/dbus-daemon-launch-helper
-/usr/lib/eject/dmcrypt-get-device
-/usr/lib/openssh/ssh-keysign
-/usr/lib/policykit-1/polkit-agent-helper-1
-/usr/lib/polkit-1/polkit-agent-helper-1
-/usr/lib/pt_chown
-/usr/lib/snapd/snap-confine
-/usr/lib/spice-gtk/spice-client-glib-usb-acl-helper
-/usr/lib/x86_64-linux-gnu/lxc/lxc-user-nic
-/usr/lib/xorg/Xorg.wrap
-/usr/libexec/Xorg.wrap
-/usr/libexec/abrt-action-install-debuginfo-to-abrt-cache
-/usr/libexec/dbus-1/dbus-daemon-launch-helper
-/usr/libexec/gstreamer-1.0/gst-ptp-helper
-/usr/libexec/openssh/ssh-keysign
-/usr/libexec/polkit-1/polkit-agent-helper-1
-/usr/libexec/pt_chown
-/usr/libexec/qemu-bridge-helper
-/usr/libexec/spice-gtk-x86_64/spice-client-glib-usb-acl-helper
-/usr/sbin/exim4
-/usr/sbin/grub2-set-bootflag
-/usr/sbin/mount.nfs
-/usr/sbin/mtr-packet
-/usr/sbin/pam_timestamp_check
-/usr/sbin/pppd
-/usr/sbin/pppoe-wrapper
-/usr/sbin/suexec
-/usr/sbin/unix_chkpwd
-/usr/sbin/userhelper
-/usr/sbin/usernetctl
-/usr/sbin/uuidd
-"
-#regex rules for common setuid
-lse_common_setuid="$lse_common_setuid
-/snap/core/.*
-/var/tmp/mkinitramfs.*
-"
-#critical writable files
-lse_critical_writable="
-/etc/apache2/apache2.conf
-/etc/apache2/httpd.conf
-/etc/bash.bashrc
-/etc/bash_completion
-/etc/bash_completion.d/*
-/etc/environment
-/etc/environment.d/*
-/etc/hosts.allow
-/etc/hosts.deny
-/etc/httpd/conf/httpd.conf
-/etc/httpd/httpd.conf
-/etc/incron.conf
-/etc/incron.d/*
-/etc/logrotate.d/*
-/etc/modprobe.d/*
-/etc/pam.d/*
-/etc/passwd
-/etc/php*/fpm/pool.d/*
-/etc/php/*/fpm/pool.d/*
-/etc/profile
-/etc/profile.d/*
-/etc/rc*.d/*
-/etc/rsyslog.d/*
-/etc/shadow
-/etc/skel/*
-/etc/sudoers
-/etc/sudoers.d/*
-/etc/supervisor/conf.d/*
-/etc/supervisor/supervisord.conf
-/etc/sysctl.conf
-/etc/sysctl.d/*
-/etc/uwsgi/apps-enabled/*
-/root/.ssh/authorized_keys
-"
-#critical writable directories
-lse_critical_writable_dirs="
-/etc/bash_completion.d
-/etc/cron.d
-/etc/cron.daily
-/etc/cron.hourly
-/etc/cron.weekly
-/etc/environment.d
-/etc/logrotate.d
-/etc/modprobe.d
-/etc/pam.d
-/etc/profile.d
-/etc/rsyslog.d/
-/etc/sudoers.d/
-/etc/sysctl.d
-/root
-"
 #)
 
 ########################################################################( TESTS

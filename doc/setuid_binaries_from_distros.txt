@@ -91,6 +91,32 @@ ub1810:/usr/lib/xorg/Xorg.wrap
 ub1810:/usr/sbin/pppd
 
 
+Ubuntu 21.04
+------------
+
+ub2104:/usr/lib/openssh/ssh-keysign
+ub2104:/usr/lib/xorg/Xorg.wrap
+ub2104:/usr/lib/dbus-1.0/dbus-daemon-launch-helper
+ub2104:/usr/sbin/pppd
+ub2104:/usr/local/share/panasonic/printer/bin/L_H0JDUCZAZ
+ub2104:/usr/libexec/spice-client-glib-usb-acl-helper
+ub2104:/usr/libexec/polkit-agent-helper-1
+ub2104:/usr/bin/mount
+ub2104:/usr/bin/pumount
+ub2104:/usr/bin/chsh
+ub2104:/usr/bin/su
+ub2104:/usr/bin/firejail
+ub2104:/usr/bin/umount
+ub2104:/usr/bin/pkexec
+ub2104:/usr/bin/chfn
+ub2104:/usr/bin/passwd
+ub2104:/usr/bin/fusermount
+ub2104:/usr/bin/newgrp
+ub2104:/usr/bin/sudo
+ub2104:/usr/bin/gpasswd
+ub2104:/usr/bin/pmount
+
+
 Debian
 ------
 
@@ -200,6 +226,28 @@ cent66:/usr/sbin/userhelper
 cent66:/usr/sbin/usernetctl
 
 
+CentOS release 7
+----------------
+
+cent70:/usr/bin/chfn
+cent70:/usr/bin/chsh
+cent70:/usr/bin/chage
+cent70:/usr/bin/gpasswd
+cent70:/usr/bin/newgrp
+cent70:/usr/bin/mount
+cent70:/usr/bin/su
+cent70:/usr/bin/sudo
+cent70:/usr/bin/umount
+cent70:/usr/bin/pkexec
+cent70:/usr/bin/crontab
+cent70:/usr/bin/passwd
+cent70:/usr/sbin/unix_chkpwd
+cent70:/usr/sbin/pam_timestamp_check
+cent70:/usr/sbin/usernetctl
+cent70:/usr/lib/polkit-1/polkit-agent-helper-1
+cent70:/usr/libexec/dbus-1/dbus-daemon-launch-helper
+
+
 openSUSE 15.0
 -------------
 
@@ -225,6 +273,31 @@ osu150:/usr/bin/umount
 osu150:/usr/lib/dbus-1/dbus-daemon-launch-helper
 osu150:/usr/lib/polkit-1/polkit-agent-helper-1
 osu150:/usr/sbin/pppoe-wrapper
+
+
+OpenSUSE Leap 15.3
+------------------
+
+osl153:/usr/lib/dbus-1/dbus-daemon-launch-helper
+osl153:/usr/lib/polkit-1/polkit-agent-helper-1
+osl153:/usr/bin/sudo
+osl153:/usr/bin/chfn
+osl153:/usr/bin/chsh
+osl153:/usr/bin/expiry
+osl153:/usr/bin/gpasswd
+osl153:/usr/bin/newgidmap
+osl153:/usr/bin/newgrp
+osl153:/usr/bin/newuidmap
+osl153:/usr/bin/passwd
+osl153:/usr/bin/mount
+osl153:/usr/bin/su
+osl153:/usr/bin/umount
+osl153:/usr/bin/fusermount
+osl153:/usr/bin/pkexec
+osl153:/usr/bin/crontab
+osl153:/sbin/unix2_chkpwd
+osl153:/sbin/unix_chkpwd
+osl153:/sbin/mount.nfs
 
 
 Fedora Workstation 29
@@ -258,3 +331,27 @@ fedw29:/usr/sbin/mtr-packet
 fedw29:/usr/sbin/pam_timestamp_check
 fedw29:/usr/sbin/unix_chkpwd
 fedw29:/usr/sbin/userhelper
+
+
+Fedora Server 34
+----------------
+
+feds34:/usr/bin/chage
+feds34:/usr/bin/gpasswd
+feds34:/usr/bin/newgrp
+feds34:/usr/bin/mount
+feds34:/usr/bin/su
+feds34:/usr/bin/umount
+feds34:/usr/bin/pkexec
+feds34:/usr/bin/crontab
+feds34:/usr/bin/sudo
+feds34:/usr/bin/passwd
+feds34:/usr/bin/chfn
+feds34:/usr/bin/chsh
+feds34:/usr/bin/at
+feds34:/usr/sbin/grub2-set-bootflag
+feds34:/usr/sbin/pam_timestamp_check
+feds34:/usr/sbin/unix_chkpwd
+feds34:/usr/sbin/mount.nfs
+feds34:/usr/lib/polkit-1/polkit-agent-helper-1
+feds34:/usr/libexec/cockpit-session
