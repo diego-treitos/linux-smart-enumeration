@@ -502,7 +502,8 @@ lse_serve() {
     cecho "${green}   * ${white}wget ${reset}           '$ip:$port' -O lse.sh; chmod 755 lse.sh\n"
     cecho "${green}   * ${white}exec 3<>/dev/tcp/${reset}$ip/$port;printf '\\\\n'>&3;cat<&3>lse.sh;exec 3<&-;chmod 755 lse.sh\n"
   done
-  nc -l -q0 -p "$port" < "$0" >/dev/null
+  # try nc with '-N' (openbsd), then ncat and then use '-q0' (traditional)
+  nc -l -N -p "$port" < "$0" >/dev/null 2>/dev/null || nc -l --send-only -p "$port" < "$0" >/dev/null 2>/dev/null || nc -l -q0 -p "$port" < "$0" >/dev/null
 }
 lse_header() {
   local id="$1"
