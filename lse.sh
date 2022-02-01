@@ -1263,6 +1263,11 @@ lse_run_tests_software() {
     "Can we write to screen session sockets from other users?" \
     'find /run/screen -type s -writable -regex "/run/screen/S-.+/.+" ! -user $lse_user -exec ls -l {} +'
 
+  #check connection to mongoDB
+  lse_test "sof170" "1" \
+    "Can we access MongoDB databases without credentials?" \
+    'echo "show dbs" | mongo --quiet | grep -E "(admin|config|local)"'
+
   #sudo version - check to see if there are any known vulnerabilities with this
   lse_test "sof500" "2" \
     "Sudo version" \
