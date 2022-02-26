@@ -550,17 +550,26 @@ lse_procmon() {
 }
 lse_proc_print() {
   # Pretty prints output from lse_procmom received via stdin
-  printf "${green}%s %8s %8s %s\n" "START" "PID" "USER" "COMMAND"
+  if $lse_color; then
+    printf "${green}%s %8s %8s %s\n" "START" "PID" "USER" "COMMAND"
+  else
+    printf "%s %8s %8s %s\n" "START" "PID" "USER" "COMMAND"
+  fi
   while read -r l; do
     p_num=`echo "$l" | cut -d" " -f1`
     p_time=`echo "$l" | cut -d" " -f2`
     p_pid=`echo "$l" | cut -d" " -f3`
     p_user=`echo "$l" | cut -d" " -f4`
     p_args=`echo "$l" | cut -d" " -f5-`
-    if [ $((p_num)) -lt 20 ]; then # few times probably periodic
-      printf "${red}%s ${reset}%8s ${yellow}%8s ${red}%s\n" "$p_time" "$p_pid" "$p_user" "$p_args"
+
+    if $lse_color; then
+      if [ $((p_num)) -lt 20 ]; then # few times probably periodic
+        printf "${red}%s ${reset}%8s ${yellow}%8s ${red}%s\n" "$p_time" "$p_pid" "$p_user" "$p_args"
+      else
+        printf "${magenta}%s ${reset}%8s ${yellow}%8s ${reset}%s\n" "$p_time" "$p_pid" "$p_user" "$p_args"
+      fi
     else
-      printf "${magenta}%s ${reset}%8s ${yellow}%8s ${reset}%s\n" "$p_time" "$p_pid" "$p_user" "$p_args"
+      printf "%s %8s %8s %s\n" "$p_time" "$p_pid" "$p_user" "$p_args"
     fi
   done
 }
