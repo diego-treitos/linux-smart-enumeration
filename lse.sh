@@ -117,6 +117,7 @@ lse_common_setuid="
 /usr/bin/firejail
 /usr/bin/fusermount
 /usr/bin/fusermount-glusterfs
+/usr/bin/fusermount3
 /usr/bin/gpasswd
 /usr/bin/kismet_capture
 /usr/bin/mount
@@ -124,6 +125,7 @@ lse_common_setuid="
 /usr/bin/newgidmap
 /usr/bin/newgrp
 /usr/bin/newuidmap
+/usr/bin/ntfs-3g
 /usr/bin/passwd
 /usr/bin/pkexec
 /usr/bin/pmount
