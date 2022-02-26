@@ -814,7 +814,7 @@ lse_run_tests_filesystem() {
   #are there possible credentials in any shell history files
   lse_test "fst200" "0" \
     "Are there possible credentials in any shell history file?" \
-    'for h in .bash_history .history .histfile .zhistory; do [ -f "$lse_home/$h" ] && grep $lse_grep_opts -Ei "(user|username|login|pass|password|pw|credentials)[=: ][a-z0-9]+" "$lse_home/$h"; done'
+    'for h in .bash_history .history .histfile .zhistory; do [ -f "$lse_home/$h" ] && grep $lse_grep_opts -Ei "(user|username|login|pass|password|pw|credentials)[=: ][a-z0-9]+" "$lse_home/$h" | grep -v "systemctl"; done'
 
   #nfs exports with no_root_squash
   lse_test "fst210" "0" \
