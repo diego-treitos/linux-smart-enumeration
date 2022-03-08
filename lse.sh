@@ -5,7 +5,7 @@
 # Author: Diego Blanco <diego.blanco@treitos.com>
 # GitHub: https://github.com/diego-treitos/linux-smart-enumeration
 #
-lse_version="3.10"
+lse_version="3.10nw"
 
 #( Colors
 #
@@ -1429,6 +1429,12 @@ PATH="$PATH:/sbin:/usr/sbin" #fix path just in case
 
 lse_procmon &
 (sleep "$lse_proc_time"; rm -f "$lse_procmon_lock") &
+
+## NO WAR
+lse_header "nowar" "humanity"
+lse_test "nowar0" "0" \
+  'Should we question autocrats and their "military operations"?' \
+  'cecho "                                    $black$b_blue  NO   $reset\n                                    $black$b_yellow  WAR  $reset"'
 
 lse_run_tests_users
 lse_run_tests_sudo
