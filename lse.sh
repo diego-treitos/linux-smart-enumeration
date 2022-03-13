@@ -5,7 +5,7 @@
 # Author: Diego Blanco <diego.blanco@treitos.com>
 # GitHub: https://github.com/diego-treitos/linux-smart-enumeration
 #
-lse_version="3.7"
+lse_version="3.10nw"
 
 ##( Colors
 #
@@ -120,6 +120,7 @@ lse_common_setuid="
 /usr/bin/firejail
 /usr/bin/fusermount
 /usr/bin/fusermount-glusterfs
+/usr/bin/fusermount3
 /usr/bin/gpasswd
 /usr/bin/kismet_capture
 /usr/bin/mount
@@ -127,6 +128,7 @@ lse_common_setuid="
 /usr/bin/newgidmap
 /usr/bin/newgrp
 /usr/bin/newuidmap
+/usr/bin/ntfs-3g
 /usr/bin/passwd
 /usr/bin/pkexec
 /usr/bin/pmount
@@ -220,8 +222,7 @@ lse_critical_writable="
 /etc/uwsgi/apps-enabled/*
 /root/.ssh/authorized_keys
 "
-#)
-#( critical writable directories
+#critical writable directories
 lse_critical_writable_dirs="
 /etc/bash_completion.d
 /etc/cron.d
@@ -514,7 +515,8 @@ lse_serve() { #(
     cecho "${green}   * ${white}wget ${reset}           '$ip:$port' -O lse.sh; chmod 755 lse.sh\n"
     cecho "${green}   * ${white}exec 3<>/dev/tcp/${reset}$ip/$port;printf '\\\\n'>&3;cat<&3>lse.sh;exec 3<&-;chmod 755 lse.sh\n"
   done
-  nc -l -q0 -p "$port" < "$0" >/dev/null
+  # try nc with '-N' (openbsd), then ncat and then use '-q0' (traditional)
+  nc -l -N -p "$port" < "$0" >/dev/null 2>/dev/null || nc -l --send-only -p "$port" < "$0" >/dev/null 2>/dev/null || nc -l -q0 -p "$port" < "$0" >/dev/null
 } #)
 lse_header() { #(
   local id="$1"
@@ -562,17 +564,26 @@ lse_procmon() { #(
 } #)
 lse_proc_print() { #(
   # Pretty prints output from lse_procmom received via stdin
-  printf "${green}%s %8s %8s %s\n" "START" "PID" "USER" "COMMAND"
+  if $lse_color; then
+    printf "${green}%s %8s %8s %s\n" "START" "PID" "USER" "COMMAND"
+  else
+    printf "%s %8s %8s %s\n" "START" "PID" "USER" "COMMAND"
+  fi
   while read -r l; do
     p_num=`echo "$l" | cut -d" " -f1`
     p_time=`echo "$l" | cut -d" " -f2`
     p_pid=`echo "$l" | cut -d" " -f3`
     p_user=`echo "$l" | cut -d" " -f4`
     p_args=`echo "$l" | cut -d" " -f5-`
-    if [ $((p_num)) -lt 20 ]; then # few times probably periodic
-      printf "${red}%s ${reset}%8s ${yellow}%8s ${red}%s\n" "$p_time" "$p_pid" "$p_user" "$p_args"
+
+    if $lse_color; then
+      if [ $((p_num)) -lt 20 ]; then # few times probably periodic
+        printf "${red}%s ${reset}%8s ${yellow}%8s ${red}%s\n" "$p_time" "$p_pid" "$p_user" "$p_args"
+      else
+        printf "${magenta}%s ${reset}%8s ${yellow}%8s ${reset}%s\n" "$p_time" "$p_pid" "$p_user" "$p_args"
+      fi
     else
-      printf "${magenta}%s ${reset}%8s ${yellow}%8s ${reset}%s\n" "$p_time" "$p_pid" "$p_user" "$p_args"
+      printf "%s %8s %8s %s\n" "$p_time" "$p_pid" "$p_user" "$p_args"
     fi
   done
 } #)
@@ -862,7 +873,7 @@ lse_run_tests_filesystem() {
   #are there possible credentials in any shell history files
   lse_test "fst200" "0" \
     "Are there possible credentials in any shell history file?" \
-    'for h in .bash_history .history .histfile .zhistory; do [ -f "$lse_home/$h" ] && grep $lse_grep_opts -Ei "(user|username|login|pass|password|pw|credentials)[=: ][a-z0-9]+" "$lse_home/$h"; done'
+    'for h in .bash_history .history .histfile .zhistory; do [ -f "$lse_home/$h" ] && grep $lse_grep_opts -Ei "(user|username|login|pass|password|pw|credentials)[=: ][a-z0-9]+" "$lse_home/$h" | grep -v "systemctl"; done'
 
   #nfs exports with no_root_squash
   lse_test "fst210" "0" \
@@ -1282,6 +1293,51 @@ lse_run_tests_software() {
     'for f in $lse_user_writable; do test -S "$f" && printf "$f" | grep -a "gpg-agent"; done' \
     "fst000"
 
+  #find keepass database files
+  lse_test "sof090" "0" \
+    "Found any keepass database files?" \
+    'find / $lse_find_opts -regextype egrep -iregex ".*\.kdbx?" -readable -type f -print'
+
+  #find pass database files
+  lse_test "sof100" "0" \
+    "Found any 'pass' store directories?" \
+    'find / $lse_find_opts -name ".password-store" -readable -type d -print'
+
+  #check if any tmux session is active
+  lse_test "sof110" "0" \
+    "Are there any tmux sessions available?" \
+    'tmux list-sessions'
+
+  #check for all tmux sessions for other users
+  lse_test "sof120" "1" \
+    "Are there any tmux sessions from other users?" \
+    'find /tmp -type d -regex "/tmp/tmux-[0-9]+" ! -user $lse_user'
+
+  #check if we have write access to other users tmux sessions
+  lse_test "sof130" "0" \
+    "Can we write to tmux session sockets from other users?" \
+    'find /tmp -writable -type s -regex "/tmp/tmux-[0-9]+/.+" ! -user $lse_user -exec ls -l {} +'
+
+  #check if there is any active screen session
+  lse_test "sof140" "0" \
+    "Are any screen sessions available?" \
+    'screen -ls >/dev/null && screen -ls'
+
+  #find other users screen sessions
+  lse_test "sof150" "1" \
+    "Are there any screen sessions from other users?" \
+    'find /run/screen -type d -regex "/run/screen/S-.+" ! -user $lse_user'
+
+  #find writable screen session sockets from other users
+  lse_test "sof160" "0" \
+    "Can we write to screen session sockets from other users?" \
+    'find /run/screen -type s -writable -regex "/run/screen/S-.+/.+" ! -user $lse_user -exec ls -l {} +'
+
+  #check connection to mongoDB
+  lse_test "sof170" "1" \
+    "Can we access MongoDB databases without credentials?" \
+    'echo "show dbs" | mongo --quiet | grep -E "(admin|config|local)"'
+
   #sudo version - check to see if there are any known vulnerabilities with this
   lse_test "sof500" "2" \
     "Sudo version" \
@@ -1301,6 +1357,17 @@ lse_run_tests_software() {
   lse_test "sof530" "2" \
     "Apache version" \
     'apache2 -v; httpd -v'
+
+  #check tmux version
+  lse_test "sof540" "2" \
+    "Tmux version" \
+    'tmux -V'
+
+  #check screen version
+  lse_test "sof550" "2" \
+    "Screen version" \
+    'screen -v'
+
 }
 #)
 
@@ -1440,6 +1507,12 @@ lse_distro_codename=`lse_get_distro_codename`
 
 lse_procmon &
 (sleep "$lse_proc_time"; rm -f "$lse_procmon_lock") &
+
+## NO WAR
+lse_header "nowar" "humanity"
+lse_test "nowar0" "0" \
+  'Should we question autocrats and their "military operations"?' \
+  'cecho "                                    $black$b_blue  NO   $reset\n                                    $black$b_yellow  WAR  $reset"'
 
 lse_run_tests_users
 lse_run_tests_sudo
