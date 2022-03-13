@@ -1,15 +1,15 @@
 #!/bin/sh
 # shellcheck disable=1003,1091,2006,2016,2034,2039
-# vim: set ts=2 sw=2 sts=2 et:
+# vim: set ts=2 sw=2 sts=2 fdm=marker fmr=#(,#) et:
 
 # Author: Diego Blanco <diego.blanco@treitos.com>
 # GitHub: https://github.com/diego-treitos/linux-smart-enumeration
 #
 lse_version="3.7"
 
-#( Colors
+##( Colors
 #
-# fg
+#( fg
 red='\e[31m'
 lred='\e[91m'
 green='\e[32m'
@@ -26,8 +26,8 @@ grey='\e[90m'
 lgrey='\e[37m'
 white='\e[97m'
 black='\e[30m'
-#
-# bg
+##)
+#( bg
 b_red='\e[41m'
 b_lred='\e[101m'
 b_green='\e[42m'
@@ -44,8 +44,8 @@ b_grey='\e[100m'
 b_lgrey='\e[47m'
 b_white='\e[107m'
 b_black='\e[40m'
-#
-# special
+##)
+#( special
 reset='\e[0;0m'
 bold='\e[01m'
 italic='\e[03m'
@@ -59,9 +59,10 @@ underline_off='\e[24m'
 inverse_off='\e[27m'
 conceil_off='\e[28m'
 crossedout_off='\e[29m'
+##)
 #)
 
-#( Globals
+##( Globals
 #
 # user
 lse_user_id="$UID"
@@ -78,6 +79,7 @@ lse_linux="`uname -r`"
 lse_hostname="`hostname`"
 lse_distro=`command -v lsb_release >/dev/null 2>&1 && lsb_release -d | sed 's/Description:\s*//' 2>/dev/null`
 [ -z "$lse_distro" ] && lse_distro="`(source /etc/os-release && echo "$PRETTY_NAME")2>/dev/null`"
+lse_distro_codename="" # retrieved below with lse_get_distro_codename
 
 # lse
 lse_passed_tests=""
@@ -85,11 +87,12 @@ lse_executed_tests=""
 lse_DEBUG=false
 lse_procmon_data=`mktemp`
 lse_procmon_lock=`mktemp`
+lse_cve_tmp=''
 
 # printf
 printf "%s" "$reset" | grep -q '\\' && alias printf="env printf"
 
-# internal data
+#( internal data
 lse_common_setuid="
 /bin/fusermount
 /bin/mount
@@ -174,12 +177,14 @@ lse_common_setuid="
 /usr/sbin/usernetctl
 /usr/sbin/uuidd
 "
-#regex rules for common setuid
+#)
+#( regex rules for common setuid
 lse_common_setuid="$lse_common_setuid
 /snap/core.*
 /var/tmp/mkinitramfs.*
 "
-#critical writable files
+#)
+#( critical writable files
 lse_critical_writable="
 /etc/apache2/apache2.conf
 /etc/apache2/httpd.conf
@@ -215,7 +220,8 @@ lse_critical_writable="
 /etc/uwsgi/apps-enabled/*
 /root/.ssh/authorized_keys
 "
-#critical writable directories
+#)
+#( critical writable directories
 lse_critical_writable_dirs="
 /etc/bash_completion.d
 /etc/cron.d
@@ -233,8 +239,13 @@ lse_critical_writable_dirs="
 /root
 "
 #)
+#( CVE list (populated by the lse packager)
+lse_cve_list="
+" #CVElistMARKER
+#)
+#)
 
-#( Options
+##( Options
 lse_color=true
 lse_alt_color=false
 lse_interactive=true
@@ -245,16 +256,16 @@ lse_find_opts='-path /proc -prune -o -path /sys -prune -o -path /dev -prune -o' 
 lse_grep_opts='--color=always'
 #)
 
-#( Lib
-cecho() {
+##( Lib
+cecho() { #(
   if $lse_color; then
     printf "%b" "$@"
   else
     # If color is disabled we remove it
     printf "%b" "$@" | sed 's/\x1B\[[0-9;]\+[A-Za-z]//g'
   fi
-}
-lse_recolor() {
+} #)
+lse_recolor() { #(
   o_white="$white"
   o_lyellow="$lyellow"
   o_grey="$grey"
@@ -268,11 +279,11 @@ lse_recolor() {
   lred="$red"
   lgreen="$b_lgreen$black"
   lcyan="$cyan"
-}
-lse_error() {
+} #)
+lse_error() { #(
   cecho "${red}ERROR: ${reset}$*\n" >&2
-}
-lse_exclude_paths() {
+} #)
+lse_exclude_paths() { #(
   local IFS="
 "
   for p in `printf "%s" "$1" | tr ',' '\n'`; do
@@ -280,8 +291,8 @@ lse_exclude_paths() {
     p="${p%%/}"
     lse_find_opts="$lse_find_opts -path ${p} -prune -o"
   done
-}
-lse_set_level() {
+} #)
+lse_set_level() { #(
   case "$1" in
     0|1|2)
       lse_level=$(($1))
@@ -291,8 +302,8 @@ lse_set_level() {
       exit 1
       ;;
   esac
-}
-lse_help() {
+} #)
+lse_help() { #(
   echo "Use: $0 [options]"
   echo
   echo " OPTIONS"
@@ -317,6 +328,7 @@ lse_help() {
   echo "                 pro: Processes related tests."
   echo "                 sof: Software related tests."
   echo "                 ctn: Container (docker, lxc) related tests."
+  echo "                 cve: CVE related tests."
   echo "               Specific tests can be used with their IDs (i.e.: usr020,sud)"
   echo "  -e PATHS     Comma separated list of paths to exclude. This allows you"
   echo "               to do faster scans at the cost of completeness"
@@ -324,8 +336,8 @@ lse_help() {
   echo "               processes. A value of 0 will disable any watch (default: 60)"
   echo "  -S           Serve the lse.sh script in this host so it can be retrieved"
   echo "               from a remote host."
-}
-lse_ask() {
+} #)
+lse_ask() { #(
   local question="$1"
   # We use stderr to print the question
   cecho "${white}${question}: ${reset}" >&2
@@ -339,24 +351,24 @@ lse_ask() {
       return 1
       ;;
   esac
-}
-lse_request_information() {
+} #)
+lse_request_information() { #(
   if $lse_interactive; then
   cecho "${grey}---\n"
     [ -z "$lse_user" ] && lse_user=`lse_ask "Could not find current user name. Current user?"`
     lse_pass=`lse_ask "If you know the current user password, write it here to check sudo privileges"`
   cecho "${grey}---\n"
   fi
-}
-lse_test_passed() {
+} #)
+lse_test_passed() { #(
   # Checks if a test passed by ID
   local id="$1"
   for i in $lse_passed_tests; do
     [ "$i" = "$id" ] && return 0
   done
   return 1
-}
-lse_test() {
+} #)
+lse_test() { #(
   # Test id
   local id="$1"
   # Minimum level required for this test to show its output
@@ -392,7 +404,7 @@ lse_test() {
 
   # Print name and line
   cecho "${white}[${l}${white}] ${grey}${id}${white} $name${grey}"
-  for i in $(seq $((${#name}+4)) 67); do
+  for i in $(seq $((${#id}+${#name}+10)) 79); do
     echo -n "."
   done
 
@@ -443,8 +455,8 @@ lse_test() {
     fi
     return 0
   fi
-}
-lse_show_info() {
+} #)
+lse_show_info() { #(
   echo
   cecho "${lcyan} LSE Version:${reset} $lse_version\n"
   echo
@@ -468,12 +480,12 @@ lse_show_info() {
 	fi
   cecho "${lblue}Architecture:${reset} $lse_arch\n"
   echo
-}
-lse_serve() {
+} #)
+lse_serve() { #(
   # get port
   which nc >/dev/null || lse_error "Could not find 'nc' netcat binary."
 
-  local_ips="`ip a | grep -Eo 'inet ([0-9]{1,3}\.){3}[0-9]{1,3}' | cut -d' ' -f2`"
+  local_ips="`ip a | grep -Eo "inet ([0-9]{1,3}\.){3}[0-9]{1,3}" | cut -d' ' -f2`"
 
   # Get a valid and non used port
   port=`od -An -N2 -i /dev/random|grep -Eo '[0-9]+'`
@@ -503,8 +515,8 @@ lse_serve() {
     cecho "${green}   * ${white}exec 3<>/dev/tcp/${reset}$ip/$port;printf '\\\\n'>&3;cat<&3>lse.sh;exec 3<&-;chmod 755 lse.sh\n"
   done
   nc -l -q0 -p "$port" < "$0" >/dev/null
-}
-lse_header() {
+} #)
+lse_header() { #(
   local id="$1"
   shift
   local title="$*"
@@ -527,8 +539,8 @@ lse_header() {
   done
   text="$text(${green} $title ${magenta})====="
   cecho "$text${reset}\n"
-}
-lse_exit() {
+} #)
+lse_exit() { #(
   local ec=1
   local text="\n${magenta}=================================="
   [ "$1" ] && ec=$1
@@ -536,9 +548,10 @@ lse_exit() {
   cecho "$text${reset}\n"
   rm -f "$lse_procmon_data"
   rm -f "$lse_procmon_lock"
+  rm -f "$lse_cve_tmp"
   exit "$ec"
-}
-lse_procmon() {
+} #)
+lse_procmon() { #(
   # monitor processes
   #NOTE: The first number will be the number of occurrences of a process due to
   #      uniq -c
@@ -546,8 +559,8 @@ lse_procmon() {
     ps -ewwwo start_time,pid,user:50,args
     sleep 0.001
   done | grep -v 'ewwwo start_time,pid,user:50,args' | sed 's/^ *//g' | tr -s '[:space:]' | grep -v "^START" | grep -Ev '[^ ]+ [^ ]+ [^ ]+ \[' | sort -Mr | uniq -c | sed 's/^ *//g' > "$lse_procmon_data"
-}
-lse_proc_print() {
+} #)
+lse_proc_print() { #(
   # Pretty prints output from lse_procmom received via stdin
   printf "${green}%s %8s %8s %s\n" "START" "PID" "USER" "COMMAND"
   while read -r l; do
@@ -562,11 +575,11 @@ lse_proc_print() {
       printf "${magenta}%s ${reset}%8s ${yellow}%8s ${reset}%s\n" "$p_time" "$p_pid" "$p_user" "$p_args"
     fi
   done
-}
-lse_get_distro() {
+} #)
+lse_get_distro_codename() { #(
   # Get the distribution name
   #
-  # ubuntu, debian, centos, redhat
+  # ubuntu, debian, centos, redhat, opsuse, fedora, rocky
   local distro="${grey}unknown${reset}"
   if type lsb_release >/dev/null 2>&1; then
     distro=`lsb_release -is`
@@ -575,22 +588,40 @@ lse_get_distro() {
     echo "$distro" | grep -qi opensuse && distro=opsuse
   elif [ -f /etc/redhat-release ]; then
     grep -qi "centos"  /etc/redhat-release && distro=centos
-    grep -qi "red hat" /etc/redhat-release && distro=redhat
     grep -qi "fedora"  /etc/redhat-release && distro=fedora
+    grep -qi "red hat" /etc/redhat-release && distro=redhat
+    grep -qi "rocky"   /etc/redhat-release && distro=rocky
   fi
   echo -n "$distro" | tr '[:upper:]' '[:lower:]' | tr -d \"\'
-}
-lse_is_version_bigger() {
+} #)
+lse_is_version_bigger() { #(
   # check if version v1 is bigger than v2
   local v1="$1"; local v2="$2" ; local vc
   vc="`printf "%s\n%s\n" "$v1" "$v2" | sort -rV | head -n1`"
-  [ "$v1" == "$vc" ] && return 0
+  [ "$v1" = "$vc" ] && return 0
   return 1
-}
-lse_get_pkg_version() {
+} #)
+lse_get_pkg_version() { #(
   # get package version depending on distro
-  #TODO: Combine lse_is_version_bigger and this one to directly compare packages: lse_compare_version "sudo". This would retrieve the package version for "sudo" for this distro and look for the vulnerable version in another CSV formated variable.
-}
+  # returns 2 if distro is unknown
+  # returns 1 if package is not installed (or doesn't exist)
+  # returns 0 on success, and prints out the package version
+  pkg_name="$1"
+  case "$lse_get_distro_codename" in
+    debian|ubuntu)
+      pkg_version=`dpkg -l "$pkg_name" 2>/dev/null | grep -E '^ii' | tr -s ' ' | cut -d' ' -f3`
+      ;;
+    centos|redhat|fedora|opsuse|rocky)
+      pkg_version=`rpm -qi "$pkg_name" 2>/dev/null | grep -E '^Version' | tr -s ' ' | cut -d' ' -f3`
+      ;;
+    *)
+      return 2
+      ;;
+  esac
+  [ -z "$pkg_version" ] && return 1
+  printf "%s" "$pkg_version"
+  return 0
+} #)
 #)
 #)
 
@@ -655,7 +686,7 @@ lse_run_tests_users() {
     'for ep in $lse_exec_paths; do [ "$ep" = "." ] && grep -ER "^ *PATH=.*" /etc/ 2> /dev/null | tr -d \"\'"'"' | grep -E "[=:]\.([:[:space:]]|\$)";done' \
     "usr070"
 }
-
+#)
 
 #########################################################################( sudo
 lse_run_tests_sudo() {
@@ -705,7 +736,7 @@ lse_run_tests_sudo() {
     "Do we know if any other users used sudo?" \
     'for uh in $(cut -d: -f1,6 /etc/passwd); do [ -f "${uh##*:}/.sudo_as_admin_successful" ] && echo "${uh%%:*}"; done'
 }
-
+#)
 
 ##################################################################( file system
 lse_run_tests_filesystem() {
@@ -868,7 +899,7 @@ lse_run_tests_filesystem() {
     "Dump fstab file" \
     'cat /etc/fstab'
 }
-
+#)
 
 #######################################################################( system
 lse_run_tests_system() {
@@ -924,7 +955,7 @@ lse_run_tests_system() {
     "System password policies in /etc/login.defs" \
     'grep "^PASS_MAX_DAYS\|^PASS_MIN_DAYS\|^PASS_WARN_AGE\|^ENCRYPT_METHOD" /etc/login.defs'
 }
-
+#)
 
 #####################################################################( security
 lse_run_tests_security() {
@@ -970,7 +1001,7 @@ lse_run_tests_security() {
     "Can we read the auditd log?" \
     'al=/var/log/audit/audit.log; test -r "$al" && echo "tail $al:" && echo && tail "$al"'
 }
-
+#)
 
 ##############################################################( recurrent tasks
 lse_run_tests_recurrent_tasks() {
@@ -1038,7 +1069,7 @@ lse_run_tests_recurrent_tasks() {
     "Systemd timers" \
     'systemctl list-timers --all'
 }
-
+#)
 
 ######################################################################( network
 lse_run_tests_network() {
@@ -1089,7 +1120,7 @@ lse_run_tests_network() {
     "Listening UDP" \
     'netstat -unlp || ss -unlp'
 }
-
+#)
 
 #####################################################################( services
 lse_run_tests_services() {
@@ -1184,7 +1215,7 @@ lse_run_tests_services() {
     "Systemd config files permissions" \
     'ls -lthR /lib/systemd/ /etc/systemd/'
 }
-
+#)
 
 #####################################################################( software
 lse_run_tests_software() {
@@ -1271,7 +1302,7 @@ lse_run_tests_software() {
     "Apache version" \
     'apache2 -v; httpd -v'
 }
-
+#)
 
 ###################################################################( containers
 lse_run_tests_containers() {
@@ -1302,7 +1333,7 @@ lse_run_tests_containers() {
     "Is the user a member of any lxc/lxd group?" \
     'groups | grep $lse_grep_opts "lxc\|lxd"'
 }
-
+#)
 
 ####################################################################( processes
 lse_run_tests_processes() {
@@ -1359,6 +1390,24 @@ lse_run_tests_processes() {
     'printf "%s\n" "$lse_proc_bin" | xargs ls -l' \
     "pro001"
 }
+#)
+
+#########################################################################( CVEs
+lse_run_tests_cves() {
+  lse_header "cve" "CVEs"
+
+  for lse_cve in $lse_cve_list; do
+    lse_cve_tmp=`mktemp`
+    printf '%s' "$lse_cve" | base64 -d | gunzip -c > "$lse_cve_tmp"
+    . "$lse_cve_tmp"
+    rm -f "$lse_cve_tmp"
+
+    lse_test "$lse_cve_id" "$lse_cve_level" \
+      "$lse_cve_description" \
+      "lse_cve_test"
+  done
+}
+#)
 #
 ##)
 
@@ -1387,6 +1436,7 @@ $lse_alt_color && lse_recolor
 lse_request_information
 lse_show_info
 PATH="$PATH:/sbin:/usr/sbin" #fix path just in case
+lse_distro_codename=`lse_get_distro_codename`
 
 lse_procmon &
 (sleep "$lse_proc_time"; rm -f "$lse_procmon_lock") &
@@ -1402,6 +1452,7 @@ lse_run_tests_services
 lse_run_tests_software
 lse_run_tests_containers
 lse_run_tests_processes
+lse_run_tests_cves
 
 lse_exit 0
 #)
