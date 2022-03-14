@@ -619,7 +619,7 @@ lse_get_pkg_version() { #(
   # returns 1 if package is not installed (or doesn't exist)
   # returns 0 on success, and prints out the package version
   pkg_name="$1"
-  case "$lse_get_distro_codename" in
+  case "$lse_distro_codename" in
     debian|ubuntu)
       pkg_version=`dpkg -l "$pkg_name" 2>/dev/null | grep -E '^ii' | tr -s ' ' | cut -d' ' -f3`
       ;;
