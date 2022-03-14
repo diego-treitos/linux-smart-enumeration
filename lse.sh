@@ -624,7 +624,8 @@ lse_get_pkg_version() { #(
       pkg_version=`dpkg -l "$pkg_name" 2>/dev/null | grep -E '^ii' | tr -s ' ' | cut -d' ' -f3`
       ;;
     centos|redhat|fedora|opsuse|rocky)
-      pkg_version=`rpm -qi "$pkg_name" 2>/dev/null | grep -E '^Version' | tr -s ' ' | cut -d' ' -f3`
+      pkg_version=`rpm -q "$pkg_name" 2>/dev/null`
+      pkg_version="${pkg_version##$pkg_name-}"
       ;;
     *)
       return 2
