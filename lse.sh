@@ -608,6 +608,7 @@ lse_get_distro_codename() { #(
 lse_is_version_bigger() { #(
   # check if version v1 is bigger than v2
   local v1="$1"; local v2="$2" ; local vc
+  [ "$v1" = "$v2" ] && return 1 # equal is not bigger
   vc="`printf "%s\n%s\n" "$v1" "$v2" | sort -rV | head -n1`"
   [ "$v1" = "$vc" ] && return 0
   return 1
