@@ -42,7 +42,7 @@ If not, you should try the `level 1` verbosity with `./lse.sh -l1` and you will 
 
 If that does not help, `level 2` will just dump everything you can gather about the service using `./lse.sh -l2`. In this case you might find useful to use `./lse.sh -l2 | less -r`.
 
-You can also select what tests to execute by passing the `-s` parameter. With it you can select specific tests or sections to be executed. For example `./lse.sh -l2 -s usr010,net,pro` will execute the test `usr010` and all the tests in the sections `net` and `pro`. 
+You can also select what tests to execute by passing the `-s` parameter. With it you can select specific tests or sections to be executed. For example `./lse.sh -l2 -s usr010,net,pro` will execute the test `usr010` and all the tests in the sections `net` and `pro`.
 
 
 ```
@@ -69,6 +69,7 @@ Use: ./lse.sh [options]
                  pro: Processes related tests.
                  sof: Software related tests.
                  ctn: Container (docker, lxc) related tests.
+                 cve: CVE related tests.
                Specific tests can be used with their IDs (i.e.: usr020,sud)
   -e PATHS     Comma separated list of paths to exclude. This allows you
                to do faster scans at the cost of completeness
@@ -104,7 +105,7 @@ Direct execution oneliners
 `bash <(wget -q -O - https://raw.githubusercontent.com/diego-treitos/linux-smart-enumeration/master/lse.sh) -l2 -i`
 
 `bash <(curl -s https://raw.githubusercontent.com/diego-treitos/linux-smart-enumeration/master/lse.sh) -l1 -i`
- 
+
 
 ## Buy me a beer
 Feel free to buy me a beer if this script was useful `;)`
