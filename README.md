@@ -102,9 +102,9 @@ Also available in [webm video](https://raw.githubusercontent.com/diego-treitos/l
 
 Direct execution oneliners
 
-`bash <(wget -q -O - https://raw.githubusercontent.com/diego-treitos/linux-smart-enumeration/master/lse.sh) -l2 -i`
+`bash <(wget -q -O - "https://github.com/diego-treitos/linux-smart-enumeration/releases/latest/download/lse.sh") -l2 -i`
 
-`bash <(curl -s https://raw.githubusercontent.com/diego-treitos/linux-smart-enumeration/master/lse.sh) -l1 -i`
+`bash <(curl -s "https://github.com/diego-treitos/linux-smart-enumeration/releases/latest/download/lse.sh") -l1 -i`
 
 
 ## Buy me a beer
