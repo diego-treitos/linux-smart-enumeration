@@ -1466,10 +1466,7 @@ lse_run_tests_cves() {
   lse_header "cve" "CVEs"
 
   for lse_cve in $lse_cve_list; do
-    lse_cve_tmp=`mktemp`
-    printf '%s' "$lse_cve" | base64 -d | gunzip -c > "$lse_cve_tmp"
-    . "$lse_cve_tmp"
-    rm -f "$lse_cve_tmp"
+    eval "$(printf '%s' "$lse_cve" | base64 -d | gunzip -c)"
 
     lse_test "$lse_cve_id" "$lse_cve_level" \
       "$lse_cve_description" \
