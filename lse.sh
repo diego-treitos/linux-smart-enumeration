@@ -1478,53 +1478,57 @@ lse_run_tests_cves() {
 ##)
 
 #( Main
-while getopts "hcCil:e:p:s:S" option; do
-  case "${option}" in
-    c) lse_color=false; lse_grep_opts='--color=never';;
-    C) lse_alt_color=true;;
-    e) lse_exclude_paths "${OPTARG}";;
-    i) lse_interactive=false;;
-    l) lse_set_level "${OPTARG}";;
-    s) lse_selection="`printf \"%s\" \"${OPTARG}\"|sed 's/,/ /g'`";;
-    p) lse_proc_time="${OPTARG}";;
-    S) lse_serve; exit $?;;
-    h) lse_help; exit 0;;
-    *) lse_help; exit 1;;
-  esac
-done
+main() {
+  while getopts "hcCil:e:p:s:S" option; do
+    case "${option}" in
+      c) lse_color=false; lse_grep_opts='--color=never';;
+      C) lse_alt_color=true;;
+      e) lse_exclude_paths "${OPTARG}";;
+      i) lse_interactive=false;;
+      l) lse_set_level "${OPTARG}";;
+      s) lse_selection="`printf \"%s\" \"${OPTARG}\"|sed 's/,/ /g'`";;
+      p) lse_proc_time="${OPTARG}";;
+      S) lse_serve; exit $?;;
+      h) lse_help; exit 0;;
+      *) lse_help; exit 1;;
+    esac
+  done
 
-#trap to exec on SIGINT
-trap "lse_exit 1" 2
+  #trap to exec on SIGINT
+  trap "lse_exit 1" 2
 
-# use alternative color scheme
-$lse_alt_color && lse_recolor
+  # use alternative color scheme
+  $lse_alt_color && lse_recolor
 
-lse_request_information
-lse_show_info
-PATH="$PATH:/sbin:/usr/sbin" #fix path just in case
-lse_distro_codename=`lse_get_distro_codename`
+  lse_request_information
+  lse_show_info
+  PATH="$PATH:/sbin:/usr/sbin" #fix path just in case
+  lse_distro_codename=`lse_get_distro_codename`
 
-lse_procmon &
-(sleep "$lse_proc_time"; rm -f "$lse_procmon_lock") &
+  lse_procmon &
+  (sleep "$lse_proc_time"; rm -f "$lse_procmon_lock") &
 
-## NO WAR
-lse_header "nowar" "humanity"
-lse_test "nowar0" "0" \
-  'Should we question autocrats and their "military operations"?' \
-  'cecho "                                    $black$b_blue  NO   $reset\n                                    $black$b_yellow  WAR  $reset"'
+  ## NO WAR
+  lse_header "nowar" "humanity"
+  lse_test "nowar0" "0" \
+    'Should we question autocrats and their "military operations"?' \
+    'cecho "                                    $black$b_blue  NO   $reset\n                                    $black$b_yellow  WAR  $reset"'
 
-lse_run_tests_users
-lse_run_tests_sudo
-lse_run_tests_filesystem
-lse_run_tests_system
-lse_run_tests_security
-lse_run_tests_recurrent_tasks
-lse_run_tests_network
-lse_run_tests_services
-lse_run_tests_software
-lse_run_tests_containers
-lse_run_tests_processes
-lse_run_tests_cves
+  lse_run_tests_users
+  lse_run_tests_sudo
+  lse_run_tests_filesystem
+  lse_run_tests_system
+  lse_run_tests_security
+  lse_run_tests_recurrent_tasks
+  lse_run_tests_network
+  lse_run_tests_services
+  lse_run_tests_software
+  lse_run_tests_containers
+  lse_run_tests_processes
+  lse_run_tests_cves
 
-lse_exit 0
+  lse_exit 0
+}
+
+[ ! "$lse_NO_EXEC" ] && main "$@"
 #)

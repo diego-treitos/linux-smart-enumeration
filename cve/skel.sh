@@ -50,3 +50,6 @@ lse_cve_test() { #(
   #       IS VULNERABLE. If it is not vulnerable there should NOT BE ANY OUTPUT.
   echo "Vulnerable!"
 } #)
+
+# Uncomment this line for testing the lse_cve_test function
+#lse_NO_EXEC=true . ../lse.sh ; lse_cve_test
