@@ -481,6 +481,8 @@ lse_show_info() { #(
 	fi
   cecho "${lblue}Architecture:${reset} $lse_arch\n"
   echo
+  echo  "${green}=====================(${yellow} Current Output Verbosity Level: ${cyan}$lse_level ${green})======================${reset}"
+  echo
 } #)
 lse_serve() { #(
   # get port
