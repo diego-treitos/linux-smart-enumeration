@@ -1468,8 +1468,12 @@ lse_run_tests_processes() {
 lse_run_tests_cves() {
   lse_header "cve" "CVEs"
   if [ "${#lse_cve_list}" = 1 ]; then
-    echo "In order to test for CVEs, download lse.sh from the GitHub releases page."
-    echo "Alternatively, build lse_cve.sh using tools/package_cvs_into_lse.sh from the repository."
+    if [ -z "$lse_selection" ] || printf "%s" "$lse_selection" | grep -iq 'cve'; then
+      printf "%s\n%s\n%s" \
+        "  In order to test for CVEs, download lse.sh from the GitHub releases page." \
+        "  Alternatively, build lse_cve.sh using tools/package_cvs_into_lse.sh from the" \
+        " repository."
+    fi
   else
     for lse_cve in $lse_cve_list; do
       eval "$(printf '%s' "$lse_cve" | base64 -d | gunzip -c)"
