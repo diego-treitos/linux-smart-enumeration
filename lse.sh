@@ -638,7 +638,7 @@ lse_get_pkg_version() { #(
     debian|ubuntu)
       pkg_version=`dpkg -l "$pkg_name" 2>/dev/null | grep -E '^ii' | tr -s ' ' | cut -d' ' -f3`
       ;;
-    centos|redhat|fedora|opsuse|rocky)
+    centos|redhat|fedora|opsuse|rocky|amzn)
       pkg_version=`rpm -q "$pkg_name" 2>/dev/null`
       pkg_version="${pkg_version##$pkg_name-}"
       pkg_version=`echo "$pkg_version" | sed -E 's/\.(aarch64|armv7hl|i686|noarch|ppc64le|s390x|x86_64)$//'`
