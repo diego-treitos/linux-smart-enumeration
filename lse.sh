@@ -559,10 +559,23 @@ lse_procmon() { #(
   # monitor processes
   #NOTE: The first number will be the number of occurrences of a process due to
   #      uniq -c
+  local ps_args
+  local ps_busybox
+  if ps -V 2>&1 | grep -iq busybox; then
+    ps_args='-o pid,user,args'
+    ps_busybox=true
+  else
+    ps_args="-ewwwo start_time,pid,user:50,args"
+    ps_busybox=false
+  fi
   while [ -f "$lse_procmon_lock" ]; do
-    ps -ewwwo start_time,pid,user:50,args
+    if $ps_busybox; then
+      ps $ps_args | sed 's/^\([0-9]*\)/? \1 /g'
+    else
+      ps $ps_args
+    fi
     sleep 0.001
-  done | grep -v 'ewwwo start_time,pid,user:50,args' | sed 's/^ *//g' | tr -s '[:space:]' | grep -v "^START" | grep -Ev '[^ ]+ [^ ]+ [^ ]+ \[' | sort -Mr | uniq -c | sed 's/^ *//g' > "$lse_procmon_data"
+  done | grep -Ev "(pid,user|$lse_user *sed s/)" | sed 's/^ *//g' | tr -s '[:space:]' | grep -Ev "PID *USER *COMMAND" | grep -Ev '[^ ]+ [^ ]+ [^ ]+ \[' | sort -Mr | uniq -c | sed 's/^ *//g' > "$lse_procmon_data"
 } #)
 lse_proc_print() { #(
   # Pretty prints output from lse_procmom received via stdin
