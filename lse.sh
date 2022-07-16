@@ -263,7 +263,7 @@ cecho() { #(
     printf "%b" "$@"
   else
     # If color is disabled we remove it
-    printf "%b" "$@" | sed 's/\x1B\[[0-9;]\+[A-Za-z]//g'
+    printf "%b" "$@" | sed -r 's/(\x1B|\\e)\[[0-9;:]+[A-Za-z]//g'
   fi
 } #)
 lse_recolor() { #(
