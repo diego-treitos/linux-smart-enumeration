@@ -41,4 +41,5 @@ The following sources help to determine in which version a distribution patched 
 - Debian: [Security Bug Tracker](https://security-tracker.debian.org/tracker/) allows to search for CVEs and patched versions
 - Ubuntu: [Ubuntu Security CVEs](https://ubuntu.com/security/cves) lists CVEs affecting Ubuntu and patched versions
 - Fedora: [Koji buildserver](https://koji.fedoraproject.org/koji/) contains a changelog for each package build
+- Red Hat Enterprise Linux: [Red Hat CVE Database](https://access.redhat.com/security/security-updates/#/cve) allows to search for CVEs and patched versions
 - Amazon Linux: [Amazon Linux Security Center](https://alas.aws.amazon.com/) lists patched versions in their advisories
