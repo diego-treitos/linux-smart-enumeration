@@ -635,7 +635,7 @@ lse_get_pkg_version() { #(
   pkg_name="$1"
   case "$lse_distro_codename" in
     debian|ubuntu)
-      pkg_version=`dpkg -l "$pkg_name" 2>/dev/null | grep -E '^ii' | tr -s ' ' | cut -d' ' -f3`
+      pkg_version=`dpkg -l "$pkg_name" 2>/dev/null | grep -E '^[ih]i' | tr -s ' ' | cut -d' ' -f3`
       ;;
     centos|redhat|fedora|opsuse|rocky|amzn)
       pkg_version=`rpm -q "$pkg_name" 2>/dev/null`
