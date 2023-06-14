@@ -611,6 +611,7 @@ lse_get_distro_codename() { #(
   elif [ -f /etc/os-release ]; then
     distro=`grep -E '^ID=' /etc/os-release | cut -f2 -d=`
     echo "$distro" | grep -qi opensuse && distro=opsuse
+    echo "$distro" | grep -qi rhel && distro=redhat
   elif [ -f /etc/redhat-release ]; then
     grep -qi "centos"  /etc/redhat-release && distro=centos
     grep -qi "fedora"  /etc/redhat-release && distro=fedora
