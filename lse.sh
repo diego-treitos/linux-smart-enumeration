@@ -911,7 +911,7 @@ lse_run_tests_filesystem() {
   #check for SSH files anywhere
   lse_test "fst510" "2" \
     "SSH files anywhere" \
-    'find / $lse_find_opts \( -name "*id_dsa*" -o -name "*id_rsa*" -o -name "known_hosts" -o -name "authorized_hosts" -o -name "authorized_keys" \) -exec ls -la {} \;'
+    'find / $lse_find_opts \( -name "*id_dsa*" -o -name "*id_rsa*" -o -name "*id_ecdsa*" -o -name "*id_ed25519*" -o -name "known_hosts" -o -name "authorized_hosts" -o -name "authorized_keys" \) -exec ls -la {} \;'
 
   #dump hosts.equiv file
   lse_test "fst520" "2" \
