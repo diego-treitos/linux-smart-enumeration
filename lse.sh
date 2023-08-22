@@ -846,7 +846,7 @@ lse_run_tests_filesystem() {
   #looking for credentials in /etc/fstab and /etc/mtab
   lse_test "fst120" "0" \
     "Are there any credentials in fstab/mtab?" \
-    'grep $lse_grep_opts -Ei "(user|username|login|pass|password|pw|credentials)[=:]" /etc/fstab /etc/mtab'
+    'grep $lse_grep_opts -Ei "(user|username|login|pass|password|pw|credentials|cred)[=:]" /etc/fstab /etc/mtab'
 
   #check if current user has mail
   lse_test "fst130" "1" \
