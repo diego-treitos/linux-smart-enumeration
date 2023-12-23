@@ -1356,6 +1356,11 @@ lse_run_tests_software() {
     "Can we access MongoDB databases without credentials?" \
     'echo "show dbs" | mongo --quiet | grep -E "(admin|config|local)"'
 
+  #find kerberos credentials
+  lse_test "sof180" "0" \
+    "Can we access any Kerberos credentials?" \
+    'find / $lse_find_opts -name "*.so" -prune -o \( -name "krb5cc*" -o -name "*.ccache" -o -name "*.kirbi" -o -name "*.keytab" \) -type f -readable -exec ls -lh {} +'
+
   #sudo version - check to see if there are any known vulnerabilities with this
   lse_test "sof500" "2" \
     "Sudo version" \
