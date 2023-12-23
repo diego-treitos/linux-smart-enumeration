@@ -1,11 +1,15 @@
 #!/bin/sh
-# shellcheck disable=1003,1091,2006,2016,2034,2039
+# shellcheck disable=1003,1091,2006,2016,2034,2039,3043
 # vim: set ts=2 sw=2 sts=2 fdm=marker fmr=#(,#) et:
 
 # Author: Diego Blanco <diego.blanco@treitos.com>
 # GitHub: https://github.com/diego-treitos/linux-smart-enumeration
 #
+<<<<<<< HEAD
 lse_version="4.8nw"
+=======
+lse_version="4.13nw"
+>>>>>>> 5744f262275d159ff3207d759254ff0446f1eb24
 
 ##( Colors
 #
@@ -65,8 +69,7 @@ crossedout_off='\e[29m'
 ##( Globals
 #
 # user
-lse_user_id="$UID"
-[ -z "$lse_user_id" ] && lse_user_id="`id -u`"
+lse_user_id="`id -u`"
 lse_user="$USER"
 [ -z "$lse_user" ] && lse_user="`id -nu`"
 lse_pass=""
@@ -78,7 +81,7 @@ lse_arch="`uname -m`"
 lse_linux="`uname -r`"
 lse_hostname="`hostname`"
 lse_distro=`command -v lsb_release >/dev/null 2>&1 && lsb_release -d | sed 's/Description:\s*//' 2>/dev/null`
-[ -z "$lse_distro" ] && lse_distro="`(source /etc/os-release && echo "$PRETTY_NAME")2>/dev/null`"
+[ -z "$lse_distro" ] && lse_distro="`(. /etc/os-release && echo "$PRETTY_NAME")2>/dev/null`"
 lse_distro_codename="" # retrieved below with lse_get_distro_codename
 
 # lse
@@ -90,7 +93,7 @@ lse_procmon_lock=`mktemp`
 lse_cve_tmp=''
 
 # printf
-printf "%s" "$reset" | grep -q '\\' && alias printf="env printf"
+printf "$reset" | grep -q '\\' && alias printf="env printf"
 
 #( internal data
 lse_common_setuid="
@@ -382,6 +385,8 @@ lse_test() { #(
   local deps="$5"
   # Variable name where to store the output
   local var="$6"
+  # Flags affecting the execution of certain tests
+  local flags="$7"
 
   # Define colors
   local l="${lred}!"
@@ -406,8 +411,14 @@ lse_test() { #(
   # Print name and line
   cecho "${white}[${l}${white}] ${grey}${id}${white} $name${grey}"
   for i in $(seq $((${#id}+${#name}+10)) 79); do
-    echo -n "."
+    printf "."
   done
+
+  # Check if test should be skipped when running as root
+  if [ "$lse_user_id" -eq 0 ] && [ "$flags" = "rootskip" ]; then
+    cecho " ${grey}skip\n"
+    return 1
+  fi
 
   # Check dependencies
   local non_met_deps=""
@@ -483,6 +494,10 @@ lse_show_info() { #(
   echo
   cecho  "${green}=====================(${yellow} Current Output Verbosity Level: ${cyan}$lse_level ${green})======================${reset}"
   echo
+  if [ "$lse_user_id" -eq 0 ]; then
+    cecho  "${green}============(${yellow} Already running as ${red}root${yellow}, some tests will be skipped! ${green})============${reset}"
+    echo
+  fi
 } #)
 lse_serve() { #(
   # get port
@@ -612,13 +627,14 @@ lse_get_distro_codename() { #(
   elif [ -f /etc/os-release ]; then
     distro=`grep -E '^ID=' /etc/os-release | cut -f2 -d=`
     echo "$distro" | grep -qi opensuse && distro=opsuse
+    echo "$distro" | grep -qi rhel && distro=redhat
   elif [ -f /etc/redhat-release ]; then
     grep -qi "centos"  /etc/redhat-release && distro=centos
     grep -qi "fedora"  /etc/redhat-release && distro=fedora
     grep -qi "red hat" /etc/redhat-release && distro=redhat
     grep -qi "rocky"   /etc/redhat-release && distro=rocky
   fi
-  echo -n "$distro" | tr '[:upper:]' '[:lower:]' | tr -d \"\'
+  printf '%s' "$distro" | tr '[:upper:]' '[:lower:]' | tr -d \"\'
 } #)
 lse_is_version_bigger() { #(
   # check if version v1 is bigger than v2
@@ -636,11 +652,11 @@ lse_get_pkg_version() { #(
   pkg_name="$1"
   case "$lse_distro_codename" in
     debian|ubuntu)
-      pkg_version=`dpkg -l "$pkg_name" 2>/dev/null | grep -E '^ii' | tr -s ' ' | cut -d' ' -f3`
+      pkg_version=`dpkg -l "$pkg_name" 2>/dev/null | grep -E '^[ih]i' | tr -s ' ' | cut -d' ' -f3`
       ;;
     centos|redhat|fedora|opsuse|rocky|amzn)
       pkg_version=`rpm -q "$pkg_name" 2>/dev/null`
-      pkg_version="${pkg_version##$pkg_name-}"
+      pkg_version="${pkg_version##"$pkg_name"-}"
       pkg_version=`echo "$pkg_version" | sed -E 's/\.(aarch64|armv7hl|i686|noarch|ppc64le|s390x|x86_64)$//'`
       ;;
     *)
@@ -778,7 +794,8 @@ lse_run_tests_filesystem() {
     # Add symlinks owned by the user (so the user can change where they point)
     find  / -path "$lse_home" -prune -o $lse_find_opts -type l -user $lse_user -print' \
     "" \
-    "lse_user_writable"
+    "lse_user_writable" \
+    "rootskip"
 
   #get setuid binaries
   lse_test "fst010" "1" \
@@ -846,7 +863,7 @@ lse_run_tests_filesystem() {
   #looking for credentials in /etc/fstab and /etc/mtab
   lse_test "fst120" "0" \
     "Are there any credentials in fstab/mtab?" \
-    'grep $lse_grep_opts -Ei "(user|username|login|pass|password|pw|credentials)[=:]" /etc/fstab /etc/mtab'
+    'grep $lse_grep_opts -Ei "(user|username|login|pass|password|pw|credentials|cred)[=:]" /etc/fstab /etc/mtab'
 
   #check if current user has mail
   lse_test "fst130" "1" \
@@ -906,12 +923,13 @@ lse_run_tests_filesystem() {
   #files owned by user
   lse_test "fst500" "2" \
     "Files owned by user '$lse_user'" \
-    'find / $lse_find_opts -user $lse_user -type f -exec ls -al {} \;'
+    'find / $lse_find_opts -user $lse_user -type f -exec ls -al {} \;' \
+    "" "" "rootskip"
 
   #check for SSH files anywhere
   lse_test "fst510" "2" \
     "SSH files anywhere" \
-    'find / $lse_find_opts \( -name "*id_dsa*" -o -name "*id_rsa*" -o -name "known_hosts" -o -name "authorized_hosts" -o -name "authorized_keys" \) -exec ls -la {} \;'
+    'find / $lse_find_opts \( -name "*id_dsa*" -o -name "*id_rsa*" -o -name "*id_ecdsa*" -o -name "*id_ed25519*" -o -name "known_hosts" -o -name "authorized_hosts" -o -name "authorized_keys" \) -exec ls -la {} \;'
 
   #dump hosts.equiv file
   lse_test "fst520" "2" \
@@ -1355,6 +1373,11 @@ lse_run_tests_software() {
   lse_test "sof170" "1" \
     "Can we access MongoDB databases without credentials?" \
     'echo "show dbs" | mongo --quiet | grep -E "(admin|config|local)"'
+
+  #find kerberos credentials
+  lse_test "sof180" "0" \
+    "Can we access any Kerberos credentials?" \
+    'find / $lse_find_opts -name "*.so" -prune -o \( -name "krb5cc*" -o -name "*.ccache" -o -name "*.kirbi" -o -name "*.keytab" \) -type f -readable -exec ls -lh {} +'
 
   #sudo version - check to see if there are any known vulnerabilities with this
   lse_test "sof500" "2" \
