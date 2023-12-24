@@ -2,9 +2,13 @@
 
 First, a couple of useful oneliners ;)
 
-`wget "https://github.com/diego-treitos/linux-smart-enumeration/releases/latest/download/lse.sh" -O lse.sh;chmod 700 lse.sh`
+```console
+wget "https://github.com/diego-treitos/linux-smart-enumeration/releases/latest/download/lse.sh" -O lse.sh;chmod 700 lse.sh
+```
 
-`curl "https://github.com/diego-treitos/linux-smart-enumeration/releases/latest/download/lse.sh" -Lo lse.sh;chmod 700 lse.sh`
+```console
+curl "https://github.com/diego-treitos/linux-smart-enumeration/releases/latest/download/lse.sh" -Lo lse.sh;chmod 700 lse.sh
+```
 
 Note that since version `2.10` you can *serve the script* to other hosts with the `-S` flag!
 
@@ -45,7 +49,7 @@ If that does not help, `level 2` will just dump everything you can gather about 
 You can also select what tests to execute by passing the `-s` parameter. With it you can select specific tests or sections to be executed. For example `./lse.sh -l2 -s usr010,net,pro` will execute the test `usr010` and all the tests in the sections `net` and `pro`.
 
 
-```
+```console
 Use: ./lse.sh [options]
 
  OPTIONS
@@ -102,12 +106,16 @@ Also available in [webm video](https://raw.githubusercontent.com/diego-treitos/l
 
 Direct execution oneliners
 
-`bash <(wget -q -O - "https://github.com/diego-treitos/linux-smart-enumeration/releases/latest/download/lse.sh") -l2 -i`
+```console
+bash <(wget -q -O - "https://github.com/diego-treitos/linux-smart-enumeration/releases/latest/download/lse.sh") -l2 -i
+```
 
-`bash <(curl -s "https://github.com/diego-treitos/linux-smart-enumeration/releases/latest/download/lse.sh") -l1 -i`
+```console
+bash <(curl -s "https://github.com/diego-treitos/linux-smart-enumeration/releases/latest/download/lse.sh") -l1 -i
+```
 
 
 ## Buy me a beer
-Feel free to buy me a beer if this script was useful `;)`
+Feel free to buy me a beer if this script was useful `:)`
 
 **₿**: `1DNBZRAzP6WVnTeBPoYvnDtjxnS1S8Gnxk`
